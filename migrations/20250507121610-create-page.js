@@ -1,4 +1,8 @@
+/* eslint-disable no-unused-vars */
 "use strict";
+
+const { sequelize } = require("../models");
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -17,9 +21,15 @@ module.exports = {
       },
       chapterId: {
         type: Sequelize.INTEGER,
+        references: {
+          model: "Chapters", // name of the referenced table
+          key: "id", // primary key of the referenced table
+        },
+        onDelete: "CASCADE", // Optional: Automatically delete pages when the associated chapter is deleted
       },
       completed: {
-        type: Sequelize.BOOLEAN,
+        type: sequelize.BOOLEAN,
+        allowNull: false,
         defaultValue: false,
       },
       createdAt: {

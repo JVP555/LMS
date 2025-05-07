@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
@@ -267,7 +269,7 @@ app.get("/page/:pageId", ensureLoggedIn, async (req, res) => {
       order: [["id", "DESC"]],
     });
 
-    res.render("page-view", {
+    res.render("page", {
       title: page.title,
       user: req.session.user,
       page,
@@ -295,7 +297,7 @@ app.post("/markCompleted/:pageId", ensureRole("educator"), async (req, res) => {
       return res.redirect("/");
     }
 
-    page.completed = true;
+    page.completed = !page.completed;
     await page.save();
 
     req.flash("success", "Page marked as completed.");
@@ -309,18 +311,45 @@ app.post("/markCompleted/:pageId", ensureRole("educator"), async (req, res) => {
     res.redirect(`/page/${pageId}`);
   }
 });
+app.get("/courses/:courseId/chapters", ensureLoggedIn, async (req, res) => {
+  const courseId = req.params.courseId;
+  try {
+    const chapters = await Chapter.findAll({ where: { courseId } });
+    const course = await Course.findByPk(courseId);
+    res.render("chapters", { course, chapters, user: req.session.user });
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to load chapters.");
+    res.redirect("/Educator");
+  }
+});
+
+app.get("/chapters/:chapterId/pages", ensureLoggedIn, async (req, res) => {
+  const chapterId = req.params.chapterId;
+  try {
+    // Fetch the chapter to ensure it exists
+    const chapter = await Chapter.findByPk(chapterId);
+    if (!chapter) {
+      req.flash("error", "Chapter not found.");
+      return res.redirect("/Educator");
+    }
+
+    // Fetch pages related to the chapter
+    const pages = await Page.findAll({ where: { chapterId } });
+
+    // Render the pages view with only the relevant pages of the chapter
+    res.render("pages", { chapter, pages, user: req.session.user });
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to load pages.");
+    res.redirect("/Educator");
+  }
+});
 
 // Logout
 app.get("/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) return res.status(500).send("Unable to log out.");
-    res.redirect("/");
-  });
-});
-
-// 404 fallback
-app.use((req, res) => {
-  res.status(404).send("Page Not Found");
+  req.session.destroy();
+  res.redirect("/signin");
 });
 
 module.exports = app;

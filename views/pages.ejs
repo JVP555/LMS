@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pages of <%= chapter.chaptername %></title>
+</head>
+<body>
+  <h1>Pages of Chapter: <%= chapter.chaptername %></h1>
+
+  <% if (pages.length === 0) { %>
+    <p>No pages found for this chapter.</p>
+  <% } else { %>
+    <ul>
+      <% pages.forEach(page => { %>
+        <li>
+          <a href="/page/<%= page.id %>"><%= page.title %></a>
+        </li>
+      <% }); %>
+    </ul>
+  <% } %>
+
+  <footer>
+    <a href="/Educator">Back to Dashboard</a>
+  </footer>
+</body>
+</html>
