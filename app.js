@@ -145,7 +145,11 @@ app.get("/Educator", (req, res) => {
   if (!req.session.user || req.session.user.role !== "educator") {
     return res.redirect("/signin");
   }
-  res.render("educator", { title: "Educator Dashboard" });
+  console.log("Logged-in user:", req.session.user); // 👈 Add this line
+  res.render("educator", {
+    title: "Educator Dashboard",
+    user: req.session.user,
+  });
 });
 
 // Example of a protected route for Students
@@ -153,7 +157,11 @@ app.get("/Student", (req, res) => {
   if (!req.session.user || req.session.user.role !== "student") {
     return res.redirect("/signin");
   }
-  res.render("student", { title: "Student Dashboard" });
+
+  res.render("student", {
+    title: "Student Dashboard",
+    user: req.session.user, // Pass the logged-in user to the view
+  });
 });
 
 // Route to log out

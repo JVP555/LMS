@@ -7,11 +7,10 @@
 </head>
 <body class="bg-white p-8 font-sans">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-bold">Welcome John Doe!</h1>
+    <h1 class="text-3xl font-bold">Welcome <%= user.firstname %> <%= user.lastname %>!</h1>
     <button onclick="window.location.href='/logout'" class="bg-red-600 text-white px-4 py-1 rounded shadow hover:bg-red-700">
         Sign Out
     </button>
-      
   </div>
 
   <div class="mb-8">
