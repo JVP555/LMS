@@ -1,0 +1,13 @@
+{
+  "name": "http-server",
+  "version": "1.0.0",
+  "description": "My http seerver application",
+  "main": "index.js",
+
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "JVP555",
+  "license": "ISC"
+}

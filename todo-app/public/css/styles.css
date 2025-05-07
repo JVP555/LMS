@@ -1,0 +1,19 @@
+body{
+    font-family: sans-serif;
+    background-color: white;
+}
+
+
+.Todo-Item:hover .trash-icon{
+    display: block;
+}
+
+h5 {
+    margin-bottom: 0.5rem; /* Adjust this value to reduce space between sections */
+  }
+  
+  .space-y-2 {
+    margin-top: 0;  /* Reset the margin-top if it's inconsistent */
+    margin-bottom: 0;  /* Same for margin-bottom */
+  }
+  

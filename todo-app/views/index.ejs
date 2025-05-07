@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>To-do Manager</title>
+  <link href="/css/styles.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+
+  <div class="min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-xl shadow-lg max-w-md w-full">
+      <!-- Include Header -->
+      <%- include('header') %>
+
+      <div class="text-center">
+        <h1 class="text-3xl font-semibold text-gray-800 mb-4">Welcome to To-do Manager</h1>
+        <p class="text-lg text-gray-600 mb-6">Organize your tasks efficiently with ease.</p>
+
+        <div class="mb-4">
+          <p class="text-md text-gray-700">New here? <a href="/signup" class="text-green-600 hover:text-green-800 font-semibold">Sign-up now</a></p>
+        </div>
+        
+        <div>
+          <p class="text-md text-gray-700">Already have an account? <a href="/login" class="text-green-600 hover:text-green-800 font-semibold">Sign-in</a></p>
+        </div>
+      </div>
+
+      <!-- Include Footer -->
+      <%- include('footer') %>
+    </div>
+  </div>
+
+</body>
+</html>

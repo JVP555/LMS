@@ -1,25 +1,27 @@
 {
-  "name": "lms",
+  "name": "wd201",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "prepare": "husky install"
+    "test": "NODE_ENV=test jest --detectOpenHandles",
+    "prepare": "husky install",
+    "db:create:test": "NODE_ENV=test npx sequelize-cli db:create",
+    "pretest": "NODE_ENV=test npx sequelize-cli db:drop && NODE_ENV=test npx sequelize-cli db:create"
   },
-  "lint-staged": {
-  "**/*.js": ["eslint --fix"]
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JVP555/wd201.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "JVP555",
   "license": "ISC",
-  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/JVP555/wd201/issues"
+  },
+  "homepage": "https://github.com/JVP555/wd201#readme",
+  "description": "",
   "devDependencies": {
-    "@eslint/js": "^9.26.0",
-    "eslint": "^9.26.0",
-    "globals": "^16.0.0",
-    "husky": "^9.1.7",
-    "jest": "^29.7.0",
-    "lint-staged": "^15.5.2"
+    "husky": "^8.0.0",
+    "sequelize-cli": "^6.6.2"
   }
 }

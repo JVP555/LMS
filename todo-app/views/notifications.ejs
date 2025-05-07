@@ -1,0 +1,9 @@
+<% if (messages && messages.error && messages.error.length > 0) { %>
+    <div class="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+      <ul class="list-disc list-inside text-sm">
+        <% messages.error.forEach(function(msg) { %>
+          <li><%= msg %></li>
+        <% }) %>
+      </ul>
+    </div>
+<% } %>
