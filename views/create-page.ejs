@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Page</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8 font-sans">
+  <div class="max-w-xl mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">Create a New Page</h1>
+
+    <%- include('notifications', { messages: messages }) %>
+
+    <form action="/newpage/<%= chapterId %>" method="POST" class="space-y-4">
+      <div>
+        <label for="title" class="block">Page Title</label>
+        <input type="text" id="title" name="title" required class="w-full border px-4 py-2 rounded" />
+      </div>
+      <div>
+        <label for="content" class="block">Page Content</label>
+        <textarea id="content" name="content" required class="w-full border px-4 py-2 rounded"></textarea>
+      </div>
+
+      <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Create Page</button>
+    </form>
+
+    <!-- Go Back Button -->
+    <div class="mt-6">
+      <button onclick="window.history.back()" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700">
+        Go Back
+      </button>
+    </div>
+  </div>
+</body>
+</html>

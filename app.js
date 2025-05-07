@@ -1,101 +1,91 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
-const flash = require("connect-flash"); // Use connect-flash here
-const { User } = require("./models"); // Assuming you have a User model
+const flash = require("connect-flash");
+const bcrypt = require("bcrypt");
 const path = require("path");
+const { User, Course, Chapter, Page } = require("./models");
+const { Op } = require("sequelize");
+
 const app = express();
 
-// Middleware setup
-app.use(express.static(path.join(__dirname, "public"))); // For static files (e.g., images, CSS)
-app.use(bodyParser.json()); // For parsing JSON request bodies
-app.use(bodyParser.urlencoded({ extended: true })); // For parsing form data
+// Middleware
+app.use(express.static(path.join(__dirname, "public")));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Session and Flash setup
 app.use(
   session({
-    secret: "your-secret-key", // Use a strong secret key here
+    secret: "your-secret-key",
     resave: false,
     saveUninitialized: true,
-    cookie: {
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
-    },
+    cookie: { maxAge: 24 * 60 * 60 * 1000 },
   })
 );
 
-app.use(flash()); // Use connect-flash here
+app.use(flash());
 
-// Setting EJS as the templating engine
+// View Engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+// Middleware: Role-based and logged-in checks
+function ensureRole(role) {
+  return (req, res, next) => {
+    if (req.session.user && req.session.user.role === role) return next();
+    res.redirect("/signin");
+  };
+}
+
+function ensureLoggedIn(req, res, next) {
+  if (req.session.user) return next();
+  res.redirect("/signin");
+}
+
+// Routes
+
 app.get("/", (req, res) => {
-  // Check if the user is logged in and has a role
   if (req.session.user) {
-    // Redirect to the respective page based on the user's role
-    if (req.session.user.role === "educator") {
-      return res.redirect("/Educator");
-    } else if (req.session.user.role === "student") {
-      return res.redirect("/Student");
-    }
+    return res.redirect(
+      `/${req.session.user.role === "educator" ? "Educator" : "Student"}`
+    );
   }
 
-  // If no user is logged in, render the index page as usual
   res.render("index", {
     title: "LMS",
-    messages: {
-      error: req.flash("error"),
-      success: req.flash("success"),
-    },
+    messages: { error: req.flash("error"), success: req.flash("success") },
   });
 });
 
-// Route for the signup page
+// Auth: Sign Up
 app.get("/signup", (req, res) => {
   res.render("signup", {
     title: "Sign Up",
-    messages: {
-      error: req.flash("error"),
-      success: req.flash("success"),
-    },
+    messages: { error: req.flash("error"), success: req.flash("success") },
   });
 });
 
-// Handle the signup form submission
 app.post("/userssignup", async (req, res) => {
   const { role, firstname, lastname, email, password } = req.body;
 
   try {
     const userExists = await User.findOne({ where: { email } });
-
     if (userExists) {
       req.flash("error", "Email already in use.");
       return res.redirect("/signup");
     }
 
-    // Create new user
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       role,
       firstname,
       lastname,
       email,
-      password, // Make sure to hash the password in real applications
+      password: hashedPassword,
     });
 
-    req.flash("success", "Registration successful!");
-
-    // Set user session
     req.session.user = newUser;
-
-    // Redirect based on role after signup
-    if (newUser.role === "educator") {
-      res.redirect("/Educator");
-    } else if (newUser.role === "student") {
-      res.redirect("/Student");
-    } else {
-      req.flash("error", "Please select a valid role.");
-      res.redirect("/signup");
-    }
+    res.redirect(`/${newUser.role === "educator" ? "Educator" : "Student"}`);
   } catch (err) {
     console.error(err);
     req.flash("error", "An error occurred during registration.");
@@ -103,39 +93,29 @@ app.post("/userssignup", async (req, res) => {
   }
 });
 
-// Route for the signin page
+// Auth: Sign In
 app.get("/signin", (req, res) => {
   res.render("signin", {
     title: "Sign In",
-    messages: {
-      error: req.flash("error"),
-      success: req.flash("success"),
-    },
+    messages: { error: req.flash("error"), success: req.flash("success") },
   });
 });
 
-// Handle the signin form submission
 app.post("/userssignin", async (req, res) => {
   const { email, password, role } = req.body;
 
   try {
     const user = await User.findOne({ where: { email } });
+    const validPassword =
+      user && (await bcrypt.compare(password, user.password));
 
-    if (!user || user.password !== password) {
+    if (!user || !validPassword) {
       req.flash("error", "Invalid email or password.");
       return res.redirect("/signin");
     }
 
     req.session.user = user;
-
-    if (role === "educator") {
-      res.redirect("/Educator");
-    } else if (role === "student") {
-      res.redirect("/Student");
-    } else {
-      req.flash("error", "Please select a valid role.");
-      res.redirect("/signin");
-    }
+    res.redirect(`/${user.role === "educator" ? "Educator" : "Student"}`);
   } catch (err) {
     console.error(err);
     req.flash("error", "An error occurred during login.");
@@ -143,38 +123,204 @@ app.post("/userssignin", async (req, res) => {
   }
 });
 
-// Example of a protected route for Educators
-app.get("/Educator", (req, res) => {
-  if (!req.session.user || req.session.user.role !== "educator") {
-    return res.redirect("/signin");
-  }
-  console.log("Logged-in user:", req.session.user); // 👈 Add this line
+// Educator Dashboard
+app.get("/Educator", ensureRole("educator"), async (req, res) => {
+  const courses = await Course.findAll({
+    where: { userId: req.session.user.id },
+  });
+
   res.render("educator", {
     title: "Educator Dashboard",
+    user: req.session.user,
+    courses,
+    messages: {
+      error: req.flash("error"),
+      success: req.flash("success"),
+    },
+  });
+});
+
+// Student Dashboard
+app.get("/Student", ensureRole("student"), (req, res) => {
+  res.render("student", {
+    title: "Student Dashboard",
     user: req.session.user,
   });
 });
 
-// Example of a protected route for Students
-app.get("/Student", (req, res) => {
-  if (!req.session.user || req.session.user.role !== "student") {
-    return res.redirect("/signin");
-  }
-
-  res.render("student", {
-    title: "Student Dashboard",
-    user: req.session.user, // Pass the logged-in user to the view
+// Course Creation
+app.get("/courses/new", ensureRole("educator"), (req, res) => {
+  res.render("create-course", {
+    title: "New Course",
+    messages: { error: req.flash("error"), success: req.flash("success") },
   });
 });
 
-// Route to log out
+app.post("/courses", ensureRole("educator"), async (req, res) => {
+  const { coursename } = req.body;
+  try {
+    const newCourse = await Course.create({
+      coursename,
+      userId: req.session.user.id,
+    });
+    req.flash("success", "Course created successfully.");
+    res.redirect(`/newchapter/${newCourse.id}`);
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to create course.");
+    res.redirect("/courses/new");
+  }
+});
+
+// Chapter Creation
+app.get("/newchapter/:courseId", ensureRole("educator"), (req, res) => {
+  res.render("create-chapter", {
+    title: "Create Chapter",
+    courseId: req.params.courseId,
+    messages: { error: req.flash("error"), success: req.flash("success") },
+  });
+});
+
+app.post("/newchapter/:courseId", ensureRole("educator"), async (req, res) => {
+  const { chaptername, description } = req.body;
+  const courseId = req.params.courseId;
+
+  try {
+    const course = await Course.findByPk(courseId);
+    if (!course) {
+      req.flash("error", "Course not found.");
+      return res.redirect(`/newchapter/${courseId}`);
+    }
+
+    const chapter = await Chapter.create({
+      chaptername,
+      description,
+      courseId,
+    });
+    req.flash("success", "Chapter created successfully.");
+    res.redirect(`/newpage/${chapter.id}`);
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to create chapter.");
+    res.redirect(`/newchapter/${courseId}`);
+  }
+});
+
+// Page Creation
+app.get("/newpage/:chapterId", ensureRole("educator"), (req, res) => {
+  res.render("create-page", {
+    title: "Create Page",
+    chapterId: req.params.chapterId,
+    messages: { error: req.flash("error"), success: req.flash("success") },
+  });
+});
+
+app.post("/newpage/:chapterId", ensureRole("educator"), async (req, res) => {
+  const { title, content } = req.body;
+  const chapterId = req.params.chapterId;
+
+  try {
+    const chapter = await Chapter.findByPk(chapterId);
+    if (!chapter) {
+      req.flash("error", "Chapter not found.");
+      return res.redirect(`/newpage/${chapterId}`);
+    }
+
+    const page = await Page.create({ title, content, chapterId });
+    req.flash("success", "Page created successfully.");
+    res.redirect(`/page/${page.id}`);
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to create page.");
+    res.redirect(`/newpage/${chapterId}`);
+  }
+});
+
+// Page View
+app.get("/page/:pageId", ensureLoggedIn, async (req, res) => {
+  const pageId = req.params.pageId;
+  try {
+    const page = await Page.findByPk(pageId, {
+      include: [{ model: Chapter, include: [Course] }],
+    });
+
+    if (!page) {
+      req.flash("error", "Page not found.");
+      return res.redirect("/");
+    }
+
+    // Find the next page in the same chapter
+    const nextPage = await Page.findOne({
+      where: {
+        chapterId: page.chapterId,
+        id: { [Op.gt]: Number(pageId) },
+      },
+      order: [["id", "ASC"]],
+    });
+
+    // Find the previous page in the same chapter
+    const prevPage = await Page.findOne({
+      where: {
+        chapterId: page.chapterId,
+        id: { [Op.lt]: Number(pageId) },
+      },
+      order: [["id", "DESC"]],
+    });
+
+    res.render("page-view", {
+      title: page.title,
+      user: req.session.user,
+      page,
+      nextPage,
+      prevPage, // Include this in the render context
+      messages: {
+        error: req.flash("error"),
+        success: req.flash("success"),
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "An error occurred while loading the page.");
+    res.redirect("/");
+  }
+});
+
+// Mark Page Completed
+app.post("/markCompleted/:pageId", ensureRole("educator"), async (req, res) => {
+  const pageId = req.params.pageId;
+  try {
+    const page = await Page.findByPk(pageId);
+    if (!page) {
+      req.flash("error", "Page not found.");
+      return res.redirect("/");
+    }
+
+    page.completed = true;
+    await page.save();
+
+    req.flash("success", "Page marked as completed.");
+    res.redirect(`/page/${pageId}`);
+  } catch (err) {
+    console.error(err);
+    req.flash(
+      "error",
+      "An error occurred while marking the page as completed."
+    );
+    res.redirect(`/page/${pageId}`);
+  }
+});
+
+// Logout
 app.get("/logout", (req, res) => {
   req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).send("Unable to log out.");
-    }
+    if (err) return res.status(500).send("Unable to log out.");
     res.redirect("/");
   });
+});
+
+// 404 fallback
+app.use((req, res) => {
+  res.status(404).send("Page Not Found");
 });
 
 module.exports = app;

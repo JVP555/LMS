@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title><%= title %></title>
+  <style>
+    .completed {
+      background-color: green;
+      color: white;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-gray-100">
+
+  <!-- Notifications -->
+  <div class="p-4">
+    <%- include('notifications', { messages: messages }) %>
+  </div>
+
+  <!-- Top Heading -->
+  <div class="text-center mt-6">
+    <h1 class="text-3xl font-semibold"><%= page.title %></h1>
+  </div>
+
+  <!-- Centered Content -->
+  <div class="flex-1 flex items-center justify-center px-8">
+    <p class="text-lg max-w-3xl text-center"><%= page.content %></p>
+  </div>
+
+  <!-- Bottom Controls -->
+  <div class="flex justify-between items-center px-6 pb-6">
+    <!-- Back Button (left) -->
+    <% if (prevPage) { %>
+      <a href="/page/<%= prevPage.id %>">
+        <button class="px-4 py-2 bg-gray-300 text-black rounded">Previous Page</button>
+      </a>
+    <% } else { %>
+      <div></div> <!-- Spacer when no previous page -->
+    <% } %>
+
+    <!-- Mark as Completed (center) -->
+    <form action="/markCompleted/<%= page.id %>" method="POST">
+      <button type="submit" class="complete-btn <%= page.completed ? 'bg-blue-500 text-white' : 'bg-green-500 text-white' %> px-4 py-2 rounded">
+        <%= page.completed ? 'Completed' : 'Mark as Completed' %>
+      </button>
+    </form>
+
+    <!-- Next Button (right) -->
+    <% if (nextPage) { %>
+      <a href="/page/<%= nextPage.id %>">
+        <button class="px-4 py-2 bg-blue-500 text-white rounded">Next Page</button>
+      </a>
+    <% } else { %>
+      <div></div> <!-- Spacer when no next page -->
+    <% } %>
+  </div>
+
+  <!-- Optional: Educator Dashboard Link at very bottom center -->
+  <div class="text-center pb-4">
+    <a href="/Educator" class="text-blue-600">Back to Educator Dashboard</a>
+  </div>
+
+</body>
+</html>
