@@ -17,6 +17,9 @@ app.use(
     secret: "your-secret-key", // Use a strong secret key here
     resave: false,
     saveUninitialized: true,
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+    },
   })
 );
 
