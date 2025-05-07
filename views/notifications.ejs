@@ -1,0 +1,17 @@
+<!-- notifications.ejs -->
+<% if (messages.error && messages.error.length > 0) { %>
+    <div class="text-red-500 mb-4">
+      <% messages.error.forEach(function(msg) { %>
+        <p><%= msg %></p>
+      <% }) %>
+    </div>
+  <% } %>
+  
+  <% if (messages.success && messages.success.length > 0) { %>
+    <div class="text-green-500 mb-4">
+      <% messages.success.forEach(function(msg) { %>
+        <p><%= msg %></p>
+      <% }) %>
+    </div>
+  <% } %>
+  

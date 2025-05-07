@@ -12,8 +12,11 @@
 
   <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
     <h2 class="text-2xl font-bold mb-6 text-center">Sign In</h2>
-    <form id="signin-form" class="space-y-4">
-      
+
+    <!-- Flash Message Display (from server-side) -->
+    <%- include('notifications', { messages: messages }) %>
+
+    <form id="signin-form" class="space-y-4" method="POST" action="/userssignin">
       <!-- Role selection buttons -->
       <div>
         <div class="flex justify-between">
@@ -26,24 +29,24 @@
             Student
           </button>
         </div>
-        <!-- Error message -->
+        <!-- Error message for role selection -->
         <p id="role-error" class="text-red-500 text-sm hidden mt-1">Please select a role.</p>
       </div>
 
       <!-- Hidden input for selected role -->
-      <input type="hidden" id="role" required>
+      <input type="hidden" id="role" name="role" required>
 
       <!-- Email -->
       <div>
         <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-        <input type="email" id="email" required
+        <input type="email" id="email" name="email" required
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
       </div>
 
       <!-- Password -->
       <div>
         <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-        <input type="password" id="password" required
+        <input type="password" id="password" name="password" required
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
       </div>
 
@@ -58,7 +61,6 @@
     const roleButtons = document.querySelectorAll('.role-btn');
     const roleInput = document.getElementById('role');
     const roleError = document.getElementById('role-error');
-    const signinForm = document.getElementById('signin-form');
 
     // Handle role button selection
     roleButtons.forEach(btn => {
@@ -71,45 +73,6 @@
         roleInput.value = btn.dataset.role;
         roleError.classList.add('hidden');
       });
-    });
-
-    // Handle form submission
-    signinForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      if (!roleInput.value) {
-        roleError.classList.remove('hidden');
-        return;
-      }
-
-      const credentials = {
-        email: document.getElementById('email').value,
-        password: document.getElementById('password').value,
-        role: roleInput.value
-      };
-
-      try {
-        const res = await fetch('/userssignin', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(credentials)
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-          // Redirect based on role
-          window.location.href = credentials.role === 'educator' ? '/Educator' : '/Student';
-        } else {
-          alert(data.error || 'Invalid credentials');
-        }
-
-      } catch (err) {
-        console.error(err);
-        alert('Something went wrong. Please try again.');
-      }
     });
   </script>
 

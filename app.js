@@ -1,97 +1,169 @@
-/* eslint-disable no-undef */
 const express = require("express");
+const bodyParser = require("body-parser");
+const session = require("express-session");
+const flash = require("connect-flash"); // Use connect-flash here
+const { User } = require("./models"); // Assuming you have a User model
 const path = require("path");
-const bcrypt = require("bcrypt");
-const { User } = require("./models"); // Make sure you have a User model set up
-
 const app = express();
 
-// Middleware to parse JSON and URL-encoded form data
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Middleware setup
+app.use(express.static(path.join(__dirname, "public"))); // For static files (e.g., images, CSS)
+app.use(bodyParser.json()); // For parsing JSON request bodies
+app.use(bodyParser.urlencoded({ extended: true })); // For parsing form data
 
-// Set up EJS as the view engine
+// Session and Flash setup
+app.use(
+  session({
+    secret: "your-secret-key", // Use a strong secret key here
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
+app.use(flash()); // Use connect-flash here
+
+// Setting EJS as the templating engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// Serve static files (CSS, JS, images)
-app.use(express.static(path.join(__dirname, "public")));
-
-// ===== Routes for rendering views =====
 app.get("/", (req, res) => {
-  res.render("index", { title: "LMS" });
+  // Check if the user is logged in and has a role
+  if (req.session.user) {
+    // Redirect to the respective page based on the user's role
+    if (req.session.user.role === "educator") {
+      return res.redirect("/Educator");
+    } else if (req.session.user.role === "student") {
+      return res.redirect("/Student");
+    }
+  }
+
+  // If no user is logged in, render the index page as usual
+  res.render("index", {
+    title: "LMS",
+    messages: {
+      error: req.flash("error"),
+      success: req.flash("success"),
+    },
+  });
 });
 
-app.get("/signin", (req, res) => {
-  res.render("signin", { title: "SIGN IN" });
-});
-
+// Route for the signup page
 app.get("/signup", (req, res) => {
-  res.render("signup", { title: "SIGN UP" });
+  res.render("signup", {
+    title: "Sign Up",
+    messages: {
+      error: req.flash("error"),
+      success: req.flash("success"),
+    },
+  });
 });
 
-app.get("/Educator", (req, res) => {
-  res.render("ehome", { title: "EDUCATOR" });
-});
-
-app.get("/Student", (req, res) => {
-  res.render("shome", { title: "STUDENT" });
-});
-
-app.get("/newcourse", (req, res) => {
-  res.render("newcourse", { title: "CREATE NEW COURSE" });
-});
-
-// ===== Route: User Registration =====
-app.post("/users", async (req, res) => {
+// Handle the signup form submission
+app.post("/userssignup", async (req, res) => {
   const { role, firstname, lastname, email, password } = req.body;
 
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const userExists = await User.findOne({ where: { email } });
 
+    if (userExists) {
+      req.flash("error", "Email already in use.");
+      return res.redirect("/signup");
+    }
+
+    // Create new user
     const newUser = await User.create({
       role,
       firstname,
       lastname,
       email,
-      password: hashedPassword,
+      password, // Make sure to hash the password in real applications
     });
 
-    console.log(`New user created with ID: ${newUser.id}`);
+    req.flash("success", "Registration successful!");
 
-    // Redirect based on user role
-    res.status(201).redirect(role === "educator" ? "/Educator" : "/Student");
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Error creating user");
+    // Set user session
+    req.session.user = newUser;
+
+    // Redirect based on role after signup
+    if (newUser.role === "educator") {
+      res.redirect("/Educator");
+    } else if (newUser.role === "student") {
+      res.redirect("/Student");
+    } else {
+      req.flash("error", "Please select a valid role.");
+      res.redirect("/signup");
+    }
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "An error occurred during registration.");
+    res.redirect("/signup");
   }
 });
 
-// ===== Route: User Login =====
+// Route for the signin page
+app.get("/signin", (req, res) => {
+  res.render("signin", {
+    title: "Sign In",
+    messages: {
+      error: req.flash("error"),
+      success: req.flash("success"),
+    },
+  });
+});
+
+// Handle the signin form submission
 app.post("/userssignin", async (req, res) => {
   const { email, password, role } = req.body;
 
   try {
-    const user = await User.findOne({ where: { email, role } });
+    const user = await User.findOne({ where: { email } });
 
-    if (!user) {
-      return res.status(401).json({ error: "User not found or role mismatch" });
+    if (!user || user.password !== password) {
+      req.flash("error", "Invalid email or password.");
+      return res.redirect("/signin");
     }
 
-    const match = await bcrypt.compare(password, user.password);
+    req.session.user = user;
 
-    if (!match) {
-      return res.status(401).json({ error: "Incorrect password" });
+    if (role === "educator") {
+      res.redirect("/Educator");
+    } else if (role === "student") {
+      res.redirect("/Student");
+    } else {
+      req.flash("error", "Please select a valid role.");
+      res.redirect("/signin");
     }
-
-    // Login successful
-    res
-      .status(200)
-      .json({ redirect: role === "educator" ? "/Educator" : "/Student" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    req.flash("error", "An error occurred during login.");
+    res.redirect("/signin");
   }
+});
+
+// Example of a protected route for Educators
+app.get("/Educator", (req, res) => {
+  if (!req.session.user || req.session.user.role !== "educator") {
+    return res.redirect("/signin");
+  }
+  res.render("educator", { title: "Educator Dashboard" });
+});
+
+// Example of a protected route for Students
+app.get("/Student", (req, res) => {
+  if (!req.session.user || req.session.user.role !== "student") {
+    return res.redirect("/signin");
+  }
+  res.render("student", { title: "Student Dashboard" });
+});
+
+// Route to log out
+app.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).send("Unable to log out.");
+    }
+    res.redirect("/");
+  });
 });
 
 module.exports = app;
