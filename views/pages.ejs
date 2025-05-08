@@ -3,25 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
   <title>Pages of <%= chapter.chaptername %></title>
+  <style>
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #f3f4f6;
+      padding: .35rem 0;
+      text-align: center;
+      box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
-<body>
-  <h1>Pages of Chapter: <%= chapter.chaptername %></h1>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <h1 class="text-2xl font-bold mb-4 mt-3 ml-5 text-gray-800">Pages of Chapter: <%= chapter.chaptername %></h1>
 
   <% if (pages.length === 0) { %>
-    <p>No pages found for this chapter.</p>
+    <p class="ml-5 text-gray-600">No pages found for this chapter.</p>
   <% } else { %>
-    <ul>
+    <div class="flex flex-col gap-4 px-5 mt-4 w-2/5">
       <% pages.forEach(page => { %>
-        <li>
-          <a href="/page/<%= page.id %>"><%= page.title %></a>
-        </li>
+        <a href="/page/<%= page.id %>" class="block p-4 border rounded-xl shadow-md transition duration-300 hover:shadow-lg hover:bg-gray-100">
+          <h2 class="text-lg font-semibold text-blue-700"><%= page.title %></h2>
+        </a>
       <% }); %>
-    </ul>
+    </div>
   <% } %>
 
-  <footer>
-    <a href="/Educator">Back to Dashboard</a>
+  <footer class="mt-auto p-4 flex justify-center items-center gap-4 text-sm text-gray-500">
+    <button onclick="window.history.back()" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition">
+      Go Back
+    </button>
+    <a href="/Educator" class="underline hover:text-gray-700 transition">
+      Back to Dashboard
+    </a>
   </footer>
+
 </body>
 </html>

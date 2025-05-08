@@ -5,26 +5,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
   <title><%= title %></title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    main {
+      flex: 1;
+      overflow-y: auto; /* Enable scrolling for content */
+      padding-bottom: 120px; /* To give space for fixed buttons at the bottom */
+    }
+    .fixed-buttons {
+      position: fixed;
+      bottom: 55px; /* Space above footer */
+      left: 0;
+      width: 100%;
+      background-color: #ffffff;
+      padding: .35rem 0;
+      box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #f3f4f6;
+      padding: .35rem 0;
+      text-align: center;
+      box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
+    }
+    header {
+      position: sticky;
+      top: 0;
+      background-color: #ffffff;
+      z-index: 10;
+      padding: .5rem 0;
+    }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col bg-gray-50 font-sans text-gray-800">
-
-  <div class="p-4">
-    </div>
+<body class="bg-gray-50 font-sans text-gray-800">
 
   <header class="text-center mt-8 mb-4 px-4">
     <h1 class="text-4xl font-bold"><%= page.title %></h1>
   </header>
 
-  <main class="flex-1 flex items-center justify-center px-6">
-    <div class="max-w-3xl text-lg leading-relaxed text-center">
+  <main class="px-6">
+    <div class="max-w-3xl text-lg leading-relaxed text-center m-auto">
       <p><%= page.content %></p>
     </div>
   </main>
 
-  <footer class="flex justify-between items-center px-6 pb-6 gap-2">
+  <!-- Fixed buttons for Previous, Mark as Completed, and Next -->
+  <div class="fixed-buttons">
     <% if (prevPage) { %>
       <a href="/page/<%= prevPage.id %>" class="w-40">
-        <button class="w-full bg-gray-300 hover:bg-gray-400 text-black font-medium px-4 py-2 rounded shadow">
+        <button class="w-full bg-gray-300 hover:bg-gray-400 text-black font-medium px-4 py-2 rounded shadow h-full">
           Previous Page
         </button>
       </a>
@@ -33,25 +72,35 @@
     <% } %>
 
     <form action="/markCompleted/<%= page.id %>" method="POST" class="w-40 text-center">
-      <button type="submit" class="w-full <%= page.completed ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600' %> text-white font-medium px-4 py-2 rounded shadow" aria-label="<%= page.completed ? 'Page already completed' : 'Mark this page as completed' %>">
+      <button type="submit"
+        class="w-full whitespace-nowrap font-medium px-3 py-2 rounded shadow h-full text-white
+        <%= page.completed
+          ? 'bg-green-500 hover:bg-green-600'
+          : 'bg-yellow-500 hover:bg-yellow-600' %>"
+        aria-label="<%= page.completed ? 'Page already completed' : 'Mark this page as completed' %>">
         <%= page.completed ? 'Completed' : 'Mark as Completed' %>
       </button>
     </form>
 
     <% if (nextPage) { %>
       <a href="/page/<%= nextPage.id %>" class="w-40">
-        <button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2 rounded shadow">
+        <button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2 rounded shadow h-full">
           Next Page
         </button>
       </a>
     <% } else { %>
       <div class="w-40"></div>
     <% } %>
-  </footer>
-
-  <div class="text-center pb-6">
-    <a href="/Educator" class="text-blue-600 hover:underline">Back to Chapter</a>
   </div>
+
+  <footer>
+    <button onclick="window.history.back()" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition">
+      Go Back
+    </button>
+    <a href="/Educator" class="underline hover:text-gray-700 transition">
+      Back to Dashboard
+    </a>
+  </footer>
 
 </body>
 </html>
