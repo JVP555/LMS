@@ -1,0 +1,18 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <% courses.forEach(course => { %>
+      <div class="border p-4 rounded shadow">
+        <h3 class="text-lg font-semibold mb-2"><%= course.coursename %></h3>
+        <p class="text-gray-600"><%= user.firstname %> <%= user.lastname %></p>
+        <div class="flex items-center text-gray-700 my-2">
+          <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 2a6 6 0 00-6 6v3a4 4 0 00-2 3.464V16h16v-1.536A4 4 0 0016 11V8a6 6 0 00-6-6z"/>
+          </svg>
+          <%= course.enrollments %> Enrollments
+        </div>
+        <div class="flex space-x-2">
+          <a href="/courses/<%= course.id %>/chapters" class="bg-cyan-400 text-black px-3 py-1 rounded">View course</a>
+          <button class="bg-green-500 text-white px-3 py-1 rounded">Enroll</button>
+        </div>
+      </div>
+    <% }) %>
+  </div>
