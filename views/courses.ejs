@@ -1,18 +1,94 @@
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Tailwind and Head -->
+<script src="https://cdn.tailwindcss.com"></script>
+<title><%= title %></title>
+<style>
+  footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f3f4f6;
+    padding: .35rem 0;
+    text-align: center;
+    box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
+  }
+</style>
+
+<% if (title === 'My Courses') { %>
+  <header class="text-center my-6">
+    <h1 class="text-3xl font-bold underline text-gray-800">My Courses</h1>
+  </header>
+<% } %>
+
+<!-- Main Course Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ml-5 mr-5">
+  <% if (courses.length === 0) { %>
+    <p class="text-center text-gray-600">No courses found.</p>
+  <% } else { %>  
     <% courses.forEach(course => { %>
-      <div class="border p-4 rounded shadow">
-        <h3 class="text-lg font-semibold mb-2"><%= course.coursename %></h3>
-        <p class="text-gray-600"><%= user.firstname %> <%= user.lastname %></p>
+      <div class="border p-4 rounded shadow-md">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-lg font-semibold"><%= course.coursename %></h3>
+          <% if (title === 'My Courses') { %>
+            <div class="flex space-x-2">
+              <a href="/courses/<%= course.id %>/edit?redirectTo=/my-courses" class="text-blue-500 hover:text-blue-700">
+                <!-- Edit icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-10 mt-2" viewBox="0 0 100 100">
+                  <path d="M 43.125 2 C 41.878906 2 40.636719 2.488281 39.6875 3.4375 L 38.875 4.25 L 45.75 11.125 C 45.746094 11.128906 46.5625 10.3125 46.5625 10.3125 C 48.464844 8.410156 48.460938 5.335938 46.5625 3.4375 C 45.609375 2.488281 44.371094 2 43.125 2 Z M 37.34375 6.03125 C 37.117188 6.0625 36.90625 6.175781 36.75 6.34375 L 4.3125 38.8125 C 4.183594 38.929688 4.085938 39.082031 4.03125 39.25 L 2.03125 46.75 C 1.941406 47.09375 2.042969 47.457031 2.292969 47.707031 C 2.542969 47.957031 2.90625 48.058594 3.25 47.96875 L 10.75 45.96875 C 10.917969 45.914063 11.070313 45.816406 11.1875 45.6875 L 43.65625 13.25 C 44.054688 12.863281 44.058594 12.226563 43.671875 11.828125 C 43.285156 11.429688 42.648438 11.425781 42.25 11.8125 L 9.96875 44.09375 L 5.90625 40.03125 L 38.1875 7.75 C 38.488281 7.460938 38.578125 7.011719 38.410156 6.628906 C 38.242188 6.246094 37.855469 6.007813 37.4375 6.03125 C 37.40625 6.03125 37.375 6.03125 37.34375 6.03125 Z"></path>
+                </svg>
+              </a>
+              <form action="/courses/<%= course.id %>/delete" method="POST" class="inline-block">
+                <button type="submit" class="text-red-500 hover:text-red-700">
+                  <!-- Delete icon -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 pt-1" viewBox="0 0 100 100">
+                    <path d="M 46 13 C 44.35503 13 43 14.35503 43 16 L 43 18 L 32.265625 18 C 30.510922 18 28.879517 18.922811 27.976562 20.427734 L 26.433594 23 L 23 23 C 20.802666 23 19 24.802666 19 27 C 19 29.197334 20.802666 31 23 31 L 24.074219 31 L 27.648438 77.458984 C 27.88773 80.575775 30.504529 83 33.630859 83 L 66.369141 83 C 69.495471 83 72.11227 80.575775 72.351562 77.458984 L 75.925781 31 L 77 31 C 79.197334 31 81 29.197334 81 27 C 81 24.802666 79.197334 23 77 23 L 73.566406 23 L 72.023438 20.427734 C 71.120481 18.922811 69.489078 18 67.734375 18 L 57 18 L 57 16 C 57 14.35503 55.64497 13 54 13 L 46 13 z M 45 18 L 55 18 L 55 16 C 55 15.43497 54.56503 15 54 15 L 46 15 C 45.43497 15 45 15.43497 45 16 Z"></path>
+                  </svg>
+                </button>
+              </form>
+            </div>
+            
+          <% } %>
+        </div>
+
+        <p class="text-gray-600">
+          By 
+          <% if (title === 'My Courses') { %>
+            <%= user.firstname %> <%= user.lastname %>
+          <% } else { %>
+            <%= course.User.firstname %> <%= course.User.lastname %>
+          <% } %>
+        </p>
+
         <div class="flex items-center text-gray-700 my-2">
           <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 2a6 6 0 00-6 6v3a4 4 0 00-2 3.464V16h16v-1.536A4 4 0 0016 11V8a6 6 0 00-6-6z"/>
           </svg>
           <%= course.enrollments %> Enrollments
         </div>
-        <div class="flex space-x-2">
-          <a href="/courses/<%= course.id %>/chapters" class="bg-cyan-400 text-black px-3 py-1 rounded">View course</a>
-          <button class="bg-green-500 text-white px-3 py-1 rounded">Enroll</button>
+
+        <div class="flex space-x-2 mt-4">
+          <a href="/courses/<%= course.id %>/chapters" class="bg-cyan-400 text-black px-3 py-1 rounded hover:bg-cyan-500 transition">
+            View Course
+          </a>
+          <% if (title !== 'My Courses') { %>
+            <button class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition">
+              Enroll
+            </button>
+          <% } %>
         </div>
       </div>
     <% }) %>
-  </div>
+  <% } %>
+</div>
+
+<!-- Footer -->
+<% if (title === 'My Courses') { %>
+  <footer class="mt-auto p-4 flex justify-center items-center gap-4 text-sm text-gray-500">
+    <button onclick="window.history.back()" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition">
+      Go Back
+    </button>
+    <a href="/Educator" class="underline hover:text-gray-700 transition">
+      Back to Dashboard
+    </a>
+  </footer>
+<% } %>

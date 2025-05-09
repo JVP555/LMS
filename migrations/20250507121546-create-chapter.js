@@ -18,6 +18,11 @@ module.exports = {
       },
       courseId: {
         type: Sequelize.INTEGER,
+        references: {
+          model: "Courses", // Make sure this matches the name of your Courses table
+          key: "id",
+        },
+        onDelete: "CASCADE", // Ensures that when a course is deleted, related chapters are also deleted
       },
       createdAt: {
         allowNull: false,
@@ -29,6 +34,7 @@ module.exports = {
       },
     });
   },
+
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable("Chapters");
   },

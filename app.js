@@ -8,6 +8,7 @@ const bcrypt = require("bcrypt");
 const path = require("path");
 const { User, Course, Chapter, Page } = require("./models");
 const { Op } = require("sequelize");
+const { title } = require("process");
 
 const app = express();
 
@@ -128,7 +129,10 @@ app.post("/userssignin", async (req, res) => {
 // Educator Dashboard
 app.get("/Educator", ensureRole("educator"), async (req, res) => {
   const courses = await Course.findAll({
-    where: { userId: req.session.user.id },
+    include: {
+      model: User,
+      attributes: ["firstname", "lastname"],
+    },
   });
 
   res.render("educator", {
@@ -345,6 +349,103 @@ app.get("/chapters/:chapterId/pages", ensureLoggedIn, async (req, res) => {
     res.redirect("/Educator");
   }
 });
+
+app.get("/my-courses", ensureLoggedIn, async (req, res) => {
+  try {
+    const myCourses = await Course.findAll({
+      where: {
+        userId: req.session.user.id,
+      },
+    });
+    res.render("courses", {
+      title: "My Courses",
+      courses: myCourses,
+      user: req.session.user,
+      messages: {
+        error: req.flash("error"),
+        success: req.flash("success"),
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    req.flash("error", "Error fetching your courses.");
+    res.redirect("/Educator");
+  }
+});
+
+// Edit Course Route (GET)
+app.get("/courses/:courseId/edit", ensureRole("educator"), async (req, res) => {
+  const courseId = req.params.courseId;
+  const redirectTo = req.query.redirectTo || "/Educator"; // default if not given
+
+  try {
+    const course = await Course.findByPk(courseId);
+    if (!course || course.userId !== req.session.user.id) {
+      req.flash("error", "You cannot edit this course.");
+      return res.redirect(redirectTo);
+    }
+
+    res.render("create-course", {
+      title: "Edit Course",
+      course,
+      redirectTo,
+      messages: {
+        error: req.flash("error"),
+        success: req.flash("success"),
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to load course for editing.");
+    res.redirect(redirectTo);
+  }
+});
+
+// Update Course Route (POST)
+app.post("/courses/:courseId", ensureRole("educator"), async (req, res) => {
+  const courseId = req.params.courseId;
+  const { coursename } = req.body;
+  const redirectTo = req.query.redirectTo || "/Educator"; // <-- FIXED
+
+  try {
+    const course = await Course.findByPk(courseId);
+    if (!course || course.userId !== req.session.user.id) {
+      req.flash("error", "You cannot edit this course.");
+      return res.redirect(redirectTo);
+    }
+
+    await course.update({ coursename });
+    req.flash("success", "Course updated successfully.");
+    res.redirect(redirectTo);
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to update course.");
+    res.redirect(`/courses/${courseId}/edit?redirectTo=${redirectTo}`);
+  }
+});
+
+// Delete Course Route (POST)
+app.post(
+  "/courses/:courseId/delete",
+  ensureRole("educator"),
+  async (req, res) => {
+    const courseId = req.params.courseId;
+    try {
+      const course = await Course.findByPk(courseId);
+      if (!course || course.userId !== req.session.user.id) {
+        req.flash("error", "You cannot delete this course.");
+        return res.redirect("/Educator");
+      }
+      await course.destroy();
+      req.flash("success", "Course deleted successfully.");
+      res.redirect("/Educator");
+    } catch (err) {
+      console.error(err);
+      req.flash("error", "Failed to delete course.");
+      res.redirect("/Educator");
+    }
+  }
+);
 
 // Logout
 app.get("/logout", (req, res) => {

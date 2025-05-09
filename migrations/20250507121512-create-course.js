@@ -15,6 +15,11 @@ module.exports = {
       },
       userId: {
         type: Sequelize.INTEGER,
+        references: {
+          model: "Users", // Ensure this matches the name of your Users table
+          key: "id",
+        },
+        onDelete: "CASCADE", // This ensures that when a user is deleted, related courses are also deleted
       },
       createdAt: {
         allowNull: false,
