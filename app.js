@@ -397,7 +397,7 @@ app.get("/courses/:courseId/edit", ensureRole("educator"), async (req, res) => {
   } catch (err) {
     console.error(err);
     req.flash("error", "Failed to load course for editing.");
-    res.redirect(redirectTo);
+    res.redirect(redirectTo); // redirecting back to where the user was
   }
 });
 
@@ -411,7 +411,7 @@ app.post("/courses/:courseId", ensureRole("educator"), async (req, res) => {
     const course = await Course.findByPk(courseId);
     if (!course || course.userId !== req.session.user.id) {
       req.flash("error", "You cannot edit this course.");
-      return res.redirect(redirectTo);
+      return res.redirect(redirectTo); // redirect to the correct page
     }
 
     await course.update({ coursename });
@@ -420,7 +420,7 @@ app.post("/courses/:courseId", ensureRole("educator"), async (req, res) => {
   } catch (err) {
     console.error(err);
     req.flash("error", "Failed to update course.");
-    res.redirect(`/courses/${courseId}/edit?redirectTo=${redirectTo}`);
+    res.redirect(`/courses/${courseId}/edit?redirectTo=${redirectTo}`); // sending back to the edit form
   }
 });
 
@@ -430,19 +430,26 @@ app.post(
   ensureRole("educator"),
   async (req, res) => {
     const courseId = req.params.courseId;
+    let redirectTo = req.query.redirectTo || "/Educator"; // Default to Educator dashboard
+
+    // Make sure the redirectTo is a safe, relative path
+    if (!redirectTo.startsWith("/") || redirectTo.includes("://")) {
+      redirectTo = "/Educator"; // Fallback if the redirectTo is unsafe
+    }
+
     try {
       const course = await Course.findByPk(courseId);
       if (!course || course.userId !== req.session.user.id) {
         req.flash("error", "You cannot delete this course.");
-        return res.redirect("/Educator");
+        return res.redirect(redirectTo); // Redirect back to safe location
       }
       await course.destroy();
       req.flash("success", "Course deleted successfully.");
-      res.redirect("/Educator");
+      res.redirect(redirectTo); // Redirect after successful deletion
     } catch (err) {
       console.error(err);
       req.flash("error", "Failed to delete course.");
-      res.redirect("/Educator");
+      res.redirect(redirectTo); // Redirect back to safe location in case of failure
     }
   }
 );
