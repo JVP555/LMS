@@ -155,6 +155,70 @@ app.get("/Student", ensureRole("student"), (req, res) => {
   });
 });
 
+app.get("/changepassword/:userId", ensureLoggedIn, async (req, res) => {
+  const { userId } = req.params;
+
+  // Ensure the user is changing their own password
+  if (parseInt(userId) !== req.session.user.id) {
+    req.flash("error", "Unauthorized access.");
+    return res.redirect("/");
+  }
+
+  res.render("change-password", {
+    title: "Change Password",
+    user: req.session.user,
+    messages: {
+      error: req.flash("error"),
+      success: req.flash("success"),
+    },
+  });
+});
+
+app.post("/changepassword/:userId", ensureLoggedIn, async (req, res) => {
+  const { userId } = req.params;
+  const { currentPassword, newPassword } = req.body;
+
+  if (parseInt(userId) !== req.session.user.id) {
+    req.flash("error", "Unauthorized access.");
+    return res.redirect("/");
+  }
+
+  try {
+    const user = await User.findByPk(userId);
+    if (!user) {
+      req.flash("error", "User not found.");
+      return res.redirect(`/changepassword/${userId}`);
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    if (!isPasswordValid) {
+      req.flash("error", "Current password is incorrect.");
+      return res.redirect(`/changepassword/${userId}`);
+    }
+    const isNewSameAsCurrent = await bcrypt.compare(newPassword, user.password);
+    if (isNewSameAsCurrent) {
+      req.flash(
+        "error",
+        "New password must be different from the current password."
+      );
+      return res.redirect(`/changepassword/${user.id}`);
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    await user.update({ password: hashedNewPassword });
+
+    req.flash("success", "Password changed successfully.");
+    res.redirect("/");
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "An error occurred while changing password.");
+    res.redirect(`/changepassword/${userId}`);
+  }
+});
+
 // Course Creation
 app.get("/courses/new", ensureRole("educator"), (req, res) => {
   res.render("create-course", {
