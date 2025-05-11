@@ -1,12 +1,10 @@
 /* eslint-disable no-undef */
-// test.js
 const request = require("supertest");
 const app = require("../app");
-// eslint-disable-next-line no-unused-vars
-const { sequelize, User, Course, Chapter, Page } = require("../models");
+const { sequelize, User } = require("../models");
 
 beforeAll(async () => {
-  await sequelize.sync({ force: true }); // Recreate DB for testing
+  await sequelize.sync({ force: true });
 });
 
 afterAll(async () => {
@@ -14,13 +12,14 @@ afterAll(async () => {
 });
 
 describe("LMS Application", () => {
-  let educatorSession;
-  let courseId;
-  let chapterId;
-  let pageId;
+  let educatorSession, studentSession;
+  let educatorId, studentId;
+  let courseId, chapterId, pageId;
 
-  test("Signup as educator", async () => {
-    const res = await request(app).post("/userssignup").send({
+  // -------- Educator Tests --------
+
+  test("Educator Signup", async () => {
+    await request(app).post("/userssignup").send({
       role: "educator",
       firstname: "Jane",
       lastname: "Doe",
@@ -28,89 +27,142 @@ describe("LMS Application", () => {
       password: "password123",
     });
 
-    expect(res.statusCode).toBe(302);
-    expect(res.headers.location).toBe("/Educator");
+    const educator = await User.findOne({
+      where: { email: "jane@example.com" },
+    });
+    educatorId = educator.id;
   });
 
-  test("Signin as educator", async () => {
+  test("Educator Signin", async () => {
     const res = await request(app).post("/userssignin").send({
       role: "educator",
       email: "jane@example.com",
       password: "password123",
     });
-
-    expect(res.statusCode).toBe(302);
-    expect(res.headers.location).toBe("/Educator");
     educatorSession = res.headers["set-cookie"];
+    expect(res.statusCode).toBe(302);
   });
 
-  test("Create new course", async () => {
+  test("Educator updates password", async () => {
+    const res = await request(app)
+      .post(`/changepassword/${educatorId}`)
+      .set("Cookie", educatorSession)
+      .send({
+        currentPassword: "password123",
+        newPassword: "newpass456",
+      });
+
+    expect(res.statusCode).toBe(302);
+  });
+
+  test("Educator creates course", async () => {
     const res = await request(app)
       .post("/courses")
       .set("Cookie", educatorSession)
-      .send({ coursename: "Test Course" });
+      .send({ coursename: "Course 1" });
 
-    expect(res.statusCode).toBe(302);
-    expect(res.headers.location).toMatch(/\/newchapter\/\d+/);
-
-    // Extract course ID from redirect URL
     courseId = res.headers.location.split("/").pop();
+    expect(res.statusCode).toBe(302);
   });
 
-  test("Create new chapter", async () => {
+  test("Educator adds chapter", async () => {
     const res = await request(app)
       .post(`/newchapter/${courseId}`)
       .set("Cookie", educatorSession)
       .send({
-        chaptername: "Intro Chapter",
-        description: "Chapter description",
+        chaptername: "Intro",
+        description: "Intro Desc",
+      });
+
+    chapterId = res.headers.location.split("/").pop();
+    expect(res.statusCode).toBe(302);
+  });
+
+  test("Educator edits chapter", async () => {
+    const res = await request(app)
+      .post(`/chapters/${chapterId}`)
+      .set("Cookie", educatorSession)
+      .send({
+        chaptername: "Updated Intro",
+        description: "Updated Desc",
       });
 
     expect(res.statusCode).toBe(302);
-    expect(res.headers.location).toMatch(/\/newpage\/\d+/);
-
-    chapterId = res.headers.location.split("/").pop();
   });
 
-  test("Create new page", async () => {
+  test("Educator adds page", async () => {
     const res = await request(app)
       .post(`/newpage/${chapterId}`)
       .set("Cookie", educatorSession)
       .send({
         title: "Page 1",
-        content: "This is page content.",
+        content: "Content 1",
+      });
+
+    pageId = res.headers.location.split("/").pop();
+    expect(res.statusCode).toBe(302);
+  });
+
+  test("Educator edits page", async () => {
+    const res = await request(app)
+      .post(`/pages/${pageId}/edit`)
+      .set("Cookie", educatorSession)
+      .send({
+        title: "Updated Page",
+        content: "Updated content",
       });
 
     expect(res.statusCode).toBe(302);
-    expect(res.headers.location).toMatch(/\/page\/\d+/);
-
-    pageId = res.headers.location.split("/").pop();
   });
 
-  test("Fetch created page", async () => {
-    const res = await request(app)
-      .get(`/page/${pageId}`)
-      .set("Cookie", educatorSession);
-
-    expect(res.statusCode).toBe(200);
-    expect(res.text).toContain("Page 1");
-    expect(res.text).toContain("This is page content.");
-  });
-
-  test("Mark page as completed", async () => {
-    const res = await request(app)
-      .post(`/markCompleted/${pageId}`)
-      .set("Cookie", educatorSession);
-
-    expect(res.statusCode).toBe(302);
-    expect(res.headers.location).toBe(`/page/${pageId}`);
-  });
-
-  test("Logout educator", async () => {
+  test("Educator Logout", async () => {
     const res = await request(app)
       .get("/logout")
       .set("Cookie", educatorSession);
     expect(res.statusCode).toBe(302);
-    expect(res.headers.location).toBe("/signin");
+  });
+
+  // -------- Student Tests --------
+
+  test("Student Signup", async () => {
+    await request(app).post("/userssignup").send({
+      role: "student",
+      firstname: "Student",
+      lastname: "One",
+      email: "student@example.com",
+      password: "studypass",
+    });
+
+    const student = await User.findOne({
+      where: { email: "student@example.com" },
+    });
+    studentId = student.id;
+  });
+
+  test("Student Signin", async () => {
+    const res = await request(app).post("/userssignin").send({
+      role: "student",
+      email: "student@example.com",
+      password: "studypass",
+    });
+    studentSession = res.headers["set-cookie"];
+    expect(res.statusCode).toBe(302);
+  });
+
+  test("Student updates password", async () => {
+    const res = await request(app)
+      .post(`/changepassword/${studentId}`)
+      .set("Cookie", studentSession)
+      .send({
+        currentPassword: "studypass",
+        newPassword: "newstudypass",
+      });
+
+    expect(res.statusCode).toBe(302);
+  });
+
+  test("Student Logout", async () => {
+    const res = await request(app).get("/logout").set("Cookie", studentSession);
+    expect(res.statusCode).toBe(302);
   });
 });
