@@ -8,46 +8,73 @@
 </head>
 <body class="bg-gray-100 font-sans">
 
-  <!-- Main Content Container -->
   <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg mt-12">
-
     <!-- Page Title -->
     <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center"><%= title %></h1>
-    <h2 class="text-xl font-semibold text-gray-700 mb-6 text-center">Create a New Chapter</h2>
 
-    <!-- Form Container -->
-    <form method="POST" action="<%= chapter ? '/chapters/' + chapter.id : '/newchapter/' + courseId %><%= redirectTo ? '?redirectTo=' + redirectTo : '' %>">
-      
-      <!-- Chapter Name Field -->
+    <!-- Subheading -->
+    <h2 class="text-xl font-semibold text-gray-700 mb-6 text-center">
+      <%= title === 'Edit Chapter' ? 'Update Chapter Details' : 'Create a New Chapter' %>
+    </h2>
+
+    <!-- Notifications -->
+    <%- include('notifications', { messages: messages }) %>
+
+    <!-- Determine Form Action -->
+    <%
+      let formAction = '';
+      if (title === 'Create New Chapter') {
+        formAction = '/newchapter/' + courseId;
+      } else if (title === 'Create Chapter') {
+        formAction = '/my-courses/' + courseId + '/my-chapters';
+      } else if (title === 'Edit Chapter') {
+        formAction = '/chapters/' + chapter.id;
+      }
+    %>
+
+    <!-- Form -->
+    <form method="POST" action="<%= formAction %>">
+      <!-- Chapter Name -->
       <div class="mb-4">
         <label for="chaptername" class="block text-lg font-medium text-gray-700 mb-2">Chapter Name:</label>
-        <input type="text" id="chaptername" name="chaptername" value="<%= chapter ? chapter.chaptername : '' %>" required
-          class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+        <input 
+          type="text" 
+          id="chaptername" 
+          name="chaptername" 
+          value="<%= chapter && chapter.chaptername ? chapter.chaptername : '' %>"
+          required
+          class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+        >
       </div>
 
-      <!-- Description Field -->
+      <!-- Description -->
       <div class="mb-6">
         <label for="description" class="block text-lg font-medium text-gray-700 mb-2">Description:</label>
-        <textarea id="description" name="description" rows="4"
-          class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"><%= chapter ? chapter.description : '' %></textarea>
+        <textarea 
+          id="description" 
+          name="description" 
+          rows="4"
+          class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+        ><%= chapter && chapter.description ? chapter.description : '' %></textarea>
       </div>
 
-      <!-- Submit Button -->
+      <!-- Submit -->
       <div class="flex justify-center">
-        <button type="submit" class="w-full sm:w-auto bg-indigo-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
-          <%= chapter ? 'Update' : 'Create' %> Chapter
+        <button 
+          type="submit" 
+          class="w-full sm:w-auto bg-indigo-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+        >
+          <%= title.includes('Edit') ? 'Update' : 'Create' %> Chapter
         </button>
       </div>
-
     </form>
 
-    <!-- Go Back Button -->
+    <!-- Go Back -->
     <div class="mt-6 text-center">
       <button onclick="window.history.back()" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition">
         Go Back
       </button>
     </div>
-
   </div>
 
 </body>

@@ -1,18 +1,29 @@
+<%
+// title: "Edit Course" or "Create Course" (set in controller)
+// courseId: only provided if editing
+// courseName: course name string
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title><%= course ? 'Edit' : 'Create' %> Course</title>
+  <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-8 font-sans">
   <div class="max-w-xl mx-auto bg-white p-6 rounded shadow">
-    <h1 class="text-2xl font-bold mb-4"><%= course ? 'Edit' : 'Create' %> a Course</h1>
+    <h1 class="text-2xl font-bold mb-4"><%= title %></h1>
 
     <%- include('notifications', { messages: messages }) %>
+    <% let actionUrl; %>
+    <% if (title === 'Edit Course') { %>
+      <% actionUrl = `/courses/${courseId}` + (redirectTo ? `?redirectTo=${redirectTo}` : '') %>
+    <% } else { %>
+      <% actionUrl = '/courses' %>
+    <% } %>
 
     <form 
-      action="<%= course ? `/courses/${course.id}?redirectTo=${redirectTo || ''}` : '/courses' %>" 
+      action="<%= actionUrl %>"
       method="POST" 
       class="space-y-4"
     >
@@ -22,14 +33,14 @@
           type="text" 
           id="coursename" 
           name="coursename" 
-          value="<%= course ? course.coursename : '' %>" 
+          value="<%= typeof courseName !== 'undefined' ? courseName : '' %>"
           required 
           class="w-full border px-4 py-2 rounded" 
         />
       </div>
 
       <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-        <%= course ? 'Update' : 'Create' %> Course
+        <%= title %>
       </button>
     </form>
 

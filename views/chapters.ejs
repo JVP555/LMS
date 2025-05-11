@@ -34,33 +34,50 @@
     <p class="text-center text-gray-600">No chapters found in this course.</p>
   <% } else { %>
     <div class="flex flex-col gap-4 w-full md:w-3/5 mt-4">
-      <% chapters.forEach(ch => { %>
-        <a href="/chapters/<%= ch.id %>/pages?redirectTo=/my-chapters/<%= course.id %>" class="text-lg font-semibold text-blue-700 hover:underline">
-        <div class="flex justify-between items-center p-4 border rounded-xl shadow-md hover:shadow-lg hover:bg-gray-100 transition">
-          <%= ch.chaptername %>
-          <% if (title === 'My Chapters') { %>
-            <div class="flex gap-3">
-              <a href="/chapters/<%= ch.id %>/edit?redirectTo=/my-chapters/<%= course.id %>" class="text-blue-600 hover:text-blue-800">
-                Edit
-              </a>
-              <form action="/chapters/<%= ch.id %>/delete?redirectTo=/my-chapters/<%= course.id %>" method="POST">
-                <button type="submit" class="text-red-600 hover:text-red-800">Delete</button>
-              </form>
-            </div>
-          <% } %>
+  <% chapters.forEach(ch => { %>
+    <% if (title === 'My Chapters') { %>
+      <div 
+        onclick="window.location.href='/my-chapters/<%= ch.id %>/my-pages?redirectTo=/my-chapters/<%= course.id %>'" 
+        class="cursor-pointer flex justify-between items-center p-4 border rounded-xl shadow-md hover:shadow-lg hover:bg-gray-100 transition"
+      >
+    <% }else { %>
+      <div 
+        onclick="window.location.href='/chapters/<%= ch.id %>/pages'" 
+        class="cursor-pointer flex justify-between items-center p-4 border rounded-xl shadow-md hover:shadow-lg hover:bg-gray-100 transition"
+      >
+    <% } %>
+      <span class="text-lg font-semibold text-blue-700">
+        <%= ch.chaptername %>
+      </span>
+      <% if (title === 'My Chapters') { %>
+        <div class="flex gap-3">
+          <a href="/chapters/<%= ch.id %>/edit?redirectTo=/my-chapters/<%= course.id %>" class="text-blue-600 hover:text-blue-800">
+            Edit
+          </a>
+          <form action="/chapters/<%= ch.id %>/delete?redirectTo=/my-chapters/<%= course.id %>" method="POST" onClick="event.stopPropagation();">
+            <button type="submit" class="text-red-600 hover:text-red-800">Delete</button>
+          </form>
         </div>
-      </a>
-      <% }) %>
+      <% } %>
     </div>
+  <% }) %>
+</div>
+
   <% } %>
 
   <footer class="mt-auto p-4 flex justify-center items-center gap-4 text-sm text-gray-500">
-    <button onclick="window.location.href='/my-chapters/<%= course.id %>'" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition">
-      Go Back
-    </button>
+    <% if (title === 'My Chapters') { %>
+      <button onclick="window.location.href='/my-courses'" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition">
+        Go Back
+      </button>
+      <a href="/Educator" class="underline hover:text-gray-700 transition">
+        Back to Dashboard
+      </a>
+    <% } else { %>
     <a href="/Educator" class="underline hover:text-gray-700 transition">
       Back to Dashboard
     </a>
+    <% } %>
   </footer>
 
 </body>

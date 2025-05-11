@@ -9,6 +9,7 @@ const path = require("path");
 const { User, Course, Chapter, Page } = require("./models");
 const { Op } = require("sequelize");
 const { title } = require("process");
+const chapter = require("./models/chapter");
 
 const app = express();
 
@@ -157,7 +158,8 @@ app.get("/Student", ensureRole("student"), (req, res) => {
 // Course Creation
 app.get("/courses/new", ensureRole("educator"), (req, res) => {
   res.render("create-course", {
-    title: "New Course",
+    title: "Create Course",
+    user: req.session.user,
     messages: { error: req.flash("error"), success: req.flash("success") },
   });
 });
@@ -181,7 +183,8 @@ app.post("/courses", ensureRole("educator"), async (req, res) => {
 // Chapter Creation
 app.get("/newchapter/:courseId", ensureRole("educator"), (req, res) => {
   res.render("create-chapter", {
-    title: "Create Chapter",
+    title: "Create New Chapter",
+    chapter: null,
     courseId: req.params.courseId,
     messages: { error: req.flash("error"), success: req.flash("success") },
   });
@@ -215,7 +218,8 @@ app.post("/newchapter/:courseId", ensureRole("educator"), async (req, res) => {
 // Page Creation
 app.get("/newpage/:chapterId", ensureRole("educator"), (req, res) => {
   res.render("create-page", {
-    title: "Create Page",
+    title: "Create New Page",
+    page: {},
     chapterId: req.params.chapterId,
     messages: { error: req.flash("error"), success: req.flash("success") },
   });
@@ -333,21 +337,24 @@ app.get("/courses/:courseId/chapters", ensureLoggedIn, async (req, res) => {
   }
 });
 
+// Already present in your code:
 app.get("/chapters/:chapterId/pages", ensureLoggedIn, async (req, res) => {
   const chapterId = req.params.chapterId;
   try {
-    // Fetch the chapter to ensure it exists
     const chapter = await Chapter.findByPk(chapterId);
     if (!chapter) {
       req.flash("error", "Chapter not found.");
       return res.redirect("/Educator");
     }
 
-    // Fetch pages related to the chapter
     const pages = await Page.findAll({ where: { chapterId } });
 
-    // Render the pages view with only the relevant pages of the chapter
-    res.render("pages", { chapter, pages, user: req.session.user });
+    res.render("pages", {
+      title: "Pages",
+      chapter,
+      pages,
+      user: req.session.user,
+    });
   } catch (err) {
     console.error(err);
     req.flash("error", "Failed to load pages.");
@@ -393,6 +400,7 @@ app.get("/courses/:courseId/edit", ensureRole("educator"), async (req, res) => {
     res.render("create-course", {
       title: "Edit Course",
       course,
+      courseId,
       redirectTo,
       messages: {
         error: req.flash("error"),
@@ -491,14 +499,31 @@ app.get("/my-chapters/:courseId", ensureRole("educator"), async (req, res) => {
   }
 });
 
+app.get(
+  "/my-courses/:courseId/my-chapters/new",
+  ensureLoggedIn,
+  ensureRole("educator"),
+  (req, res) => {
+    const courseId = req.params.courseId;
+    res.render("create-chapter", {
+      title: "Create Chapter",
+      courseId: courseId,
+      chapter: null,
+      messages: {
+        error: req.flash("error"),
+        success: req.flash("success"),
+      }, // Add this to ensure chapter is always defined
+    });
+  }
+);
 app.post(
   "/my-courses/:courseId/my-chapters",
   ensureLoggedIn,
   ensureRole("educator"),
   async (req, res) => {
+    const courseId = req.params.courseId;
     try {
-      const courseId = req.params.courseId;
-      const { chaptername, description, redirectTo } = req.body;
+      const { chaptername, description } = req.body;
 
       // Add logic to create a new chapter in the database
       const chapter = await Chapter.create({
@@ -506,34 +531,13 @@ app.post(
         chaptername: chaptername,
         description: description,
       });
-
+      res.redirect(`/my-chapters/${courseId}`);
       // Redirect to the passed redirect URL or default to the course chapters page
-      if (redirectTo) {
-        return res.redirect(redirectTo);
-      } else {
-        return res.redirect(`/my-courses/${courseId}/my-chapters`);
-      }
     } catch (err) {
       console.error(err);
       req.flash("error", "Failed to create chapter.");
-      res.redirect(`/my-courses/${courseId}/my-chapters/new`);
+      res.redirect(`/my-chapters/${courseId}`);
     }
-  }
-);
-
-app.get(
-  "/my-courses/:courseId/my-chapters/new",
-  ensureLoggedIn,
-  ensureRole("educator"),
-  (req, res) => {
-    const courseId = req.params.courseId;
-    const redirectTo = req.query.redirectTo || null; // You can pass this as a query param
-    res.render("create-chapter", {
-      title: "Create New Chapter",
-      courseId: courseId,
-      chapter: null, // Add this to ensure chapter is always defined
-      redirectTo: redirectTo, // Make sure redirectTo is passed
-    });
   }
 );
 
@@ -542,25 +546,24 @@ app.get(
   "/chapters/:chapterId/edit",
   ensureRole("educator"),
   async (req, res) => {
-    const { chapterId } = req.params;
-    const redirectTo = req.query.redirectTo || "/my-chapters";
-
     try {
+      const { chapterId } = req.params;
+
       const chapter = await Chapter.findByPk(chapterId, {
         include: [{ model: Course }],
       });
 
-      // Check if chapter exists and belongs to the logged-in user
       if (!chapter || chapter.Course.userId !== req.session.user.id) {
         req.flash("error", "You cannot edit this chapter.");
-        return res.redirect(redirectTo);
+        return res.redirect("/educator");
       }
+
+      const courseId = chapter.Course.id;
 
       res.render("create-chapter", {
         title: "Edit Chapter",
-        chapter, // Pass the chapter object to the template
-        courseId: chapter.Course.id, // Use Course ID to pass to the form
-        redirectTo,
+        chapter,
+        courseId,
         messages: {
           error: req.flash("error"),
           success: req.flash("success"),
@@ -569,36 +572,35 @@ app.get(
     } catch (err) {
       console.error(err);
       req.flash("error", "Failed to load chapter for editing.");
-      res.redirect(redirectTo);
+      res.redirect("/educator");
     }
   }
 );
 
 // Update Chapter
 app.post("/chapters/:chapterId", ensureRole("educator"), async (req, res) => {
-  const { chapterId } = req.params;
-  const { chaptername, description } = req.body;
-  const redirectTo = req.query.redirectTo || "/my-chapters";
-
   try {
+    const { chapterId } = req.params;
+    const { chaptername, description } = req.body;
+
     const chapter = await Chapter.findByPk(chapterId, {
       include: [{ model: Course }],
     });
 
-    // Check if chapter exists and belongs to the logged-in user
     if (!chapter || chapter.Course.userId !== req.session.user.id) {
       req.flash("error", "You cannot edit this chapter.");
-      return res.redirect(redirectTo);
+      return res.redirect("/educator");
     }
 
-    // Update chapter details
     await chapter.update({ chaptername, description });
+
+    const courseId = chapter.Course.id;
     req.flash("success", "Chapter updated successfully.");
-    res.redirect(redirectTo);
+    res.redirect(`/my-chapters/${courseId}`);
   } catch (err) {
     console.error(err);
     req.flash("error", "Failed to update chapter.");
-    res.redirect(`/chapters/${chapterId}/edit?redirectTo=${redirectTo}`);
+    res.redirect("/educator");
   }
 });
 
@@ -637,6 +639,190 @@ app.post(
     }
   }
 );
+//pagessss
+app.get(
+  "/my-chapters/:chapterId/my-pages",
+  ensureRole("educator"),
+  async (req, res) => {
+    const chapterId = req.params.chapterId;
+
+    try {
+      const chapter = await Chapter.findByPk(chapterId, {
+        include: [Course],
+      });
+
+      if (!chapter) {
+        req.flash("error", "Chapter not found.");
+        return res.redirect("/Educator");
+      }
+
+      const pages = await Page.findAll({ where: { chapterId } });
+
+      res.render("pages", {
+        title: "My Pages",
+        chapter,
+        pages,
+        user: req.session.user,
+        messages: {
+          error: req.flash("error"),
+          success: req.flash("success"),
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      req.flash("error", "Failed to load pages.");
+      res.redirect("/Educator");
+    }
+  }
+);
+
+app.get(
+  "/my-chapter/:chapterId/my-pages/new",
+  ensureRole("educator"),
+  async (req, res) => {
+    const chapterId = req.params.chapterId;
+    try {
+      const chapter = await Chapter.findByPk(chapterId);
+      if (!chapter) {
+        req.flash("error", "Chapter not found.");
+        return res.redirect("/Educator");
+      }
+
+      res.render("create-page", {
+        title: "Create Page",
+        page: {},
+        chapterId,
+        messages: {
+          error: req.flash("error"),
+          success: req.flash("success"),
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      req.flash("error", "Error loading the create page form.");
+      res.redirect("/Educator");
+    }
+  }
+);
+app.post(
+  "/my-chapter/:chapterId/my-pages",
+  ensureRole("educator"),
+  async (req, res) => {
+    const { title, content } = req.body;
+    const chapterId = req.params.chapterId;
+
+    try {
+      const chapter = await Chapter.findByPk(chapterId);
+      if (!chapter) {
+        req.flash("error", "Chapter not found.");
+        return res.redirect(`/my-chapter/${chapterId}/my-pages/new`);
+      }
+
+      const page = await Page.create({
+        title,
+        content,
+        chapterId,
+      });
+
+      req.flash("success", "Page created successfully.");
+      res.redirect(`/my-chapters/${chapterId}/my-pages`);
+    } catch (err) {
+      console.error(err);
+      req.flash("error", "Failed to create page.");
+      res.redirect(`/my-chapter/${chapterId}/my-pages/new`);
+    }
+  }
+);
+
+// Edit Page Route (GET)
+app.get("/pages/:pageId/edit", ensureRole("educator"), async (req, res) => {
+  const pageId = req.params.pageId;
+  try {
+    const page = await Page.findByPk(pageId);
+    if (!page) {
+      req.flash("error", "Page not found.");
+      return res.redirect("/Educator");
+    }
+
+    res.render("create-page", {
+      title: "Edit Page",
+      page,
+      user: req.session.user,
+      messages: {
+        error: req.flash("error"),
+        success: req.flash("success"),
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to load page for editing.");
+    res.redirect("/Educator");
+  }
+});
+
+// Update Page Route (POST)
+app.post("/pages/:pageId/edit", ensureRole("educator"), async (req, res) => {
+  const pageId = req.params.pageId;
+  const { title, content } = req.body;
+
+  try {
+    const page = await Page.findByPk(pageId);
+
+    if (!page) {
+      req.flash("error", "Page not found.");
+      return res.redirect("/Educator");
+    }
+
+    await page.update({ title, content });
+
+    const chapterId = page.chapterId;
+
+    req.flash("success", "Page updated successfully.");
+    res.redirect(`/my-chapters/${chapterId}/my-pages`);
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to update page.");
+    res.redirect(`/pages/${pageId}/edit`);
+  }
+});
+
+app.post("/pages/:pageId/delete", ensureRole("educator"), async (req, res) => {
+  const pageId = req.params.pageId;
+  let redirectTo = req.query.redirectTo || "/Educator"; // fallback route
+
+  // Validate redirectTo to be safe
+  if (!redirectTo.startsWith("/") || redirectTo.includes("://")) {
+    redirectTo = "/Educator";
+  }
+
+  try {
+    const page = await Page.findByPk(pageId, {
+      include: [{ model: Chapter }],
+    });
+
+    if (!page) {
+      req.flash("error", "Page not found.");
+      return res.redirect(redirectTo);
+    }
+
+    const courseOwnerId = await Course.findByPk(page.Chapter.courseId).then(
+      (course) => course?.userId
+    );
+
+    if (courseOwnerId !== req.session.user.id) {
+      req.flash("error", "You are not authorized to delete this page.");
+      return res.redirect(redirectTo);
+    }
+
+    await page.destroy();
+    req.flash("success", "Page deleted successfully.");
+    res.redirect(redirectTo);
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to delete page.");
+    res.redirect(redirectTo);
+  }
+});
 
 // Logout
 app.get("/logout", (req, res) => {
