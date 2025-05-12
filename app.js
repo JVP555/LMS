@@ -883,60 +883,69 @@ app.post("/pages/:pageId/delete", ensureRole("educator"), async (req, res) => {
 //student
 app.get("/Student", ensureRole("student"), async (req, res) => {
   try {
-    const student = await User.findByPk(req.session.user.id, {
-      include: Course,
-    });
+    const userId = req.session.user.id;
 
-    const enrolledCourses = student.Courses || [];
-    const enrolledIds = enrolledCourses.map((c) => c.id);
-
-    const availableCourses = await Course.findAll({
-      where: {
-        id: {
-          [Op.notIn]: enrolledIds,
+    // Fetch enrolled courses for this student (alias used here!)
+    const user = await User.findByPk(userId, {
+      include: {
+        model: Course,
+        as: "enrolledCourses", // <- important
+        include: {
+          model: User,
+          attributes: ["firstname", "lastname"],
         },
       },
     });
 
+    // Fetch all courses with educator info
+    const allCourses = await Course.findAll({
+      include: {
+        model: User,
+        attributes: ["firstname", "lastname"],
+      },
+    });
+
+    // Extract enrolled course IDs for filtering
+    const enrolledCourseIds = user.enrolledCourses.map((course) => course.id);
+
     res.render("student", {
       title: "Student Dashboard",
       user: req.session.user,
-      courses: enrolledCourses,
-      availableCourses,
+      enrolledCourses: user.enrolledCourses,
+      enrolledCourseIds,
+      allCourses,
       messages: {
         error: req.flash("error"),
         success: req.flash("success"),
       },
     });
   } catch (err) {
-    console.error(err);
-    req.flash("error", "Unable to load student dashboard.");
+    console.error("Error loading student dashboard:", err);
+    req.flash("error", "Failed to load dashboard.");
     res.redirect("/");
   }
 });
 
-app.post(
-  "/courses/:courseId/enroll",
-  ensureRole("student"),
-  async (req, res) => {
-    const { courseId } = req.params;
-    try {
-      const course = await Course.findByPk(courseId);
-      if (!course) {
-        req.flash("error", "Course not found.");
-        return res.redirect("/Student");
-      }
+app.post("/enroll/:courseId", ensureRole("student"), async (req, res) => {
+  try {
+    const courseId = req.params.courseId;
+    const userId = req.session.user.id;
 
-      await course.addUser(req.session.user.id);
-      req.flash("success", "Enrolled successfully.");
-      res.redirect("/Student");
-    } catch (err) {
-      console.error(err);
-      req.flash("error", "Enrollment failed.");
-      res.redirect("/Student");
+    const existing = await UserCourses.findOne({ where: { userId, courseId } });
+    if (existing) {
+      req.flash("error", "Already enrolled in this course.");
+      return res.redirect("/Student");
     }
+
+    await UserCourses.create({ userId, courseId });
+    req.flash("success", "Successfully enrolled in the course.");
+    res.redirect("/Student");
+  } catch (err) {
+    console.error("Enroll Error:", err);
+    req.flash("error", "Enrollment failed.");
+    res.redirect("/Student");
   }
-);
+});
 
 // Logout
 app.get("/logout", (req, res) => {
