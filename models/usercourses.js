@@ -1,7 +1,22 @@
 "use strict";
+const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  const UserCourses = sequelize.define("UserCourses", {}, {});
+  class UserCourses extends Model {
+    static associate(models) {
+      // Optional: Define associations if needed
+    }
+  }
+
+  UserCourses.init(
+    {},
+    {
+      sequelize,
+      modelName: "UserCourses",
+      tableName: "UserCourses",
+      timestamps: false,
+    }
+  );
 
   return UserCourses;
 };

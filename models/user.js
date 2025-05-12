@@ -4,13 +4,12 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
-      // One educator can create many courses
       User.hasMany(models.Course, { foreignKey: "userId" });
 
-      // Student can enroll in many courses
       User.belongsToMany(models.Course, {
-        through: "UserCourses",
+        through: models.UserCourses,
         foreignKey: "userId",
+        otherKey: "courseId",
         as: "enrolledCourses",
       });
     }

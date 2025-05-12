@@ -19,11 +19,42 @@
   </div>
 
   <!-- My Courses Section -->
-  <h2 class="text-xl font-semibold mb-4">My Courses</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+  <h2 class="text-xl font-semibold mb-4 text-center">My Courses</h2>
+  <% if (courses.length === 0) { %>
+    <p class="text-center text-gray-500">You are not enrolled in any courses.</p>
+  <% } else { %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <% courses.forEach(course => { %>
+        <div class="p-4 border rounded shadow hover:shadow-md transition">
+          <h3 class="text-lg font-bold mb-2"><%= course.name %></h3>
+          <p class="text-sm text-gray-600 mb-4">Educator: <%= course.educatorName %></p>
+          <a href="/course/<%= course.id %>" class="text-blue-600 hover:underline">Go to Course</a>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
 
   <hr class="my-8">
-  <h2 class="text-xl font-semibold mb-4">Available Courses</h2>
-  <%- include('courses', { messages: messages }) %>
+
+  <!-- Available Courses Section -->
+  <h2 class="text-xl font-semibold mb-4 text-center">Available Courses</h2>
+  <% if (availableCourses.length === 0) { %>
+    <p class="text-center text-gray-500">No courses available to enroll.</p>
+  <% } else { %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <% availableCourses.forEach(course => { %>
+        <div class="p-4 border rounded shadow hover:shadow-md transition">
+          <h3 class="text-lg font-bold mb-2"><%= course.name %></h3>
+          <p class="text-sm text-gray-600 mb-4">Educator: <%= course.educatorName %></p>
+          <form action="/courses/<%= course.id %>/enroll" method="POST">
+            <button type="submit" class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700">
+              Enroll
+            </button>
+          </form>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+
 </body>
 </html>

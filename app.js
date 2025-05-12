@@ -6,7 +6,7 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const bcrypt = require("bcrypt");
 const path = require("path");
-const { User, Course, Chapter, Page } = require("./models");
+const { User, Course, Chapter, Page, UserCourses } = require("./models");
 const { Op } = require("sequelize");
 const { title } = require("process");
 const chapter = require("./models/chapter");
@@ -144,14 +144,6 @@ app.get("/Educator", ensureRole("educator"), async (req, res) => {
       error: req.flash("error"),
       success: req.flash("success"),
     },
-  });
-});
-
-// Student Dashboard
-app.get("/Student", ensureRole("student"), (req, res) => {
-  res.render("student", {
-    title: "Student Dashboard",
-    user: req.session.user,
   });
 });
 
@@ -887,6 +879,64 @@ app.post("/pages/:pageId/delete", ensureRole("educator"), async (req, res) => {
     res.redirect(redirectTo);
   }
 });
+
+//student
+app.get("/Student", ensureRole("student"), async (req, res) => {
+  try {
+    const student = await User.findByPk(req.session.user.id, {
+      include: Course,
+    });
+
+    const enrolledCourses = student.Courses || [];
+    const enrolledIds = enrolledCourses.map((c) => c.id);
+
+    const availableCourses = await Course.findAll({
+      where: {
+        id: {
+          [Op.notIn]: enrolledIds,
+        },
+      },
+    });
+
+    res.render("student", {
+      title: "Student Dashboard",
+      user: req.session.user,
+      courses: enrolledCourses,
+      availableCourses,
+      messages: {
+        error: req.flash("error"),
+        success: req.flash("success"),
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Unable to load student dashboard.");
+    res.redirect("/");
+  }
+});
+
+app.post(
+  "/courses/:courseId/enroll",
+  ensureRole("student"),
+  async (req, res) => {
+    const { courseId } = req.params;
+    try {
+      const course = await Course.findByPk(courseId);
+      if (!course) {
+        req.flash("error", "Course not found.");
+        return res.redirect("/Student");
+      }
+
+      await course.addUser(req.session.user.id);
+      req.flash("success", "Enrolled successfully.");
+      res.redirect("/Student");
+    } catch (err) {
+      console.error(err);
+      req.flash("error", "Enrollment failed.");
+      res.redirect("/Student");
+    }
+  }
+);
 
 // Logout
 app.get("/logout", (req, res) => {
