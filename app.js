@@ -881,15 +881,17 @@ app.post("/pages/:pageId/delete", ensureRole("educator"), async (req, res) => {
 });
 
 //student
+const { Sequelize } = require("sequelize");
+
 app.get("/Student", ensureRole("student"), async (req, res) => {
   try {
     const userId = req.session.user.id;
 
-    // Fetch enrolled courses for this student (alias used here!)
+    // Fetch user's enrolled courses
     const user = await User.findByPk(userId, {
       include: {
         model: Course,
-        as: "enrolledCourses", // <- important
+        as: "enrolledCourses",
         include: {
           model: User,
           attributes: ["firstname", "lastname"],
@@ -905,7 +907,22 @@ app.get("/Student", ensureRole("student"), async (req, res) => {
       },
     });
 
-    // Extract enrolled course IDs for filtering
+    // Fetch enrollment counts per course
+    const enrollments = await UserCourses.findAll({
+      attributes: [
+        "courseId",
+        [Sequelize.fn("COUNT", Sequelize.col("userId")), "count"],
+      ],
+      group: ["courseId"],
+      raw: true,
+    });
+
+    // Convert the result into a dictionary: { courseId: count }
+    const enrollmentMap = {};
+    enrollments.forEach((e) => {
+      enrollmentMap[e.courseId] = parseInt(e.count);
+    });
+
     const enrolledCourseIds = user.enrolledCourses.map((course) => course.id);
 
     res.render("student", {
@@ -914,6 +931,7 @@ app.get("/Student", ensureRole("student"), async (req, res) => {
       enrolledCourses: user.enrolledCourses,
       enrolledCourseIds,
       allCourses,
+      enrollmentMap, // pass this to the view
       messages: {
         error: req.flash("error"),
         success: req.flash("success"),

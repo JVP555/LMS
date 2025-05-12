@@ -38,13 +38,9 @@ fs.readdirSync(__dirname)
     db[model.name] = model;
   });
 
-console.log("Models loaded:", Object.keys(db));
-console.log("UserCourses model is:", db.UserCourses); // <== Debug log
-
 // Run associations
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
-    console.log(`Associating model: ${modelName}`);
     db[modelName].associate(db);
   }
 });

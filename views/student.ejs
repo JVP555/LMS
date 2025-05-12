@@ -29,49 +29,70 @@
   <% } %>
 
   <!-- Enrolled Courses -->
-  <h2 class="text-2xl font-bold mb-4 underline">You have joined the following courses:</h2>
+  <h2 class="text-2xl font-bold mb-4 underline text-center">You have joined the following courses:</h2>
   <% if (enrolledCourses.length === 0) { %>
     <p class="mb-6">No courses enrolled yet.</p>
   <% } else { %>
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
       <% enrolledCourses.forEach(course => { %>
-        <div class="border-2 border-black rounded p-4 shadow-md">
-          <h3 class="text-xl font-bold mb-1"><%= course.coursename %></h3>
-          <p class="text-gray-600 font-bold"><%= course.User.firstname %> <%= course.User.lastname %></p>
-          <div class="flex items-center gap-2 text-gray-700 mt-1">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 2a6 6 0 100 12A6 6 0 0010 2z" />
-            </svg>
-            <span>279</span>
+        <div class="border-2 border-black rounded p-4 shadow-md flex flex-col justify-between">
+          <div>
+            <h3 class="text-xl font-bold mb-2"><%= course.coursename %></h3>
+            <div class="flex justify-between items-center text-gray-700 mb-4">
+              <p class="text-gray-600 font-bold"><%= course.User.firstname %> <%= course.User.lastname %></p>
+              <div class="flex items-center gap-1">
+                <svg class="w-6 h-6 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3.78552 9.5 12.7855 14l9-4.5-9-4.5-8.99998 4.5Zm0 0V17m3-6v6.2222c0 .3483 2 1.7778 
+                    5.99998 1.7778 4 0 6-1.3738 6-1.7778V11" />
+                </svg>
+                <span class="font-semibold"><%= enrollmentMap[course.id] || 0 %></span>
+              </div>
+            </div>
           </div>
-          <div class="flex gap-3 mt-4">
-            <a href="/courses/<%= course.id %>/chapters" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded shadow">Continue</a>
-            <span class="bg-purple-600 text-white px-3 py-1 rounded shadow">Completed: 0%</span>
+          <div class="flex gap-4">
+            <a href="/courses/<%= course.id %>/chapters" class="w-1/2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow flex justify-center items-center gap-1">
+              Continue
+              <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 18V6l8 6-8 6Z"/>
+              </svg>
+            </a>
+            <div class="w-1/2 bg-purple-600 text-white px-4 py-2 rounded shadow text-center font-semibold">
+              Completed: 0%
+            </div>
           </div>
         </div>
       <% }) %>
     </div>
   <% } %>
+  <hr class="my-6 border-t-2 border-gray-400">
 
   <!-- Available Courses -->
-  <h2 class="text-2xl font-bold mb-4 underline">Available Courses</h2>
-  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <h2 class="text-2xl font-bold mb-4 underline text-center">Available Courses</h2>
+  <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
     <% allCourses.forEach(course => {
          if (!enrolledCourseIds.includes(course.id)) { %>
-      <div class="border-2 border-black rounded p-4 shadow-md">
-        <h3 class="text-xl font-bold mb-1"><%= course.coursename %></h3>
-        <p class="text-gray-600 font-bold"><%= course.User.firstname %> <%= course.User.lastname %></p>
-        <div class="flex items-center gap-2 text-gray-700 mt-1">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 2a6 6 0 100 12A6 6 0 0010 2z" />
-          </svg>
-          <span>123</span>
+      <div class="border-2 border-black rounded p-4 shadow-md flex flex-col justify-between">
+        <div>
+          <h3 class="text-xl font-bold mb-2"><%= course.coursename %></h3>
+          <div class="flex justify-between items-center text-gray-700 mb-4">
+            <p class="text-gray-600 font-bold"><%= course.User.firstname %> <%= course.User.lastname %></p>
+            <div class="flex items-center gap-1">
+              <svg class="w-6 h-6 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3.78552 9.5 12.7855 14l9-4.5-9-4.5-8.99998 4.5Zm0 0V17m3-6v6.2222c0 .3483 2 1.7778 
+                  5.99998 1.7778 4 0 6-1.3738 6-1.7778V11" />
+              </svg>
+              <span class="font-semibold"><%= enrollmentMap[course.id] || 0 %></span>
+            </div>
+          </div>
         </div>
-
-        <div class="flex gap-3 mt-4">
-          <a href="/courses/<%= course.id %>/chapters" class="bg-cyan-400 hover:bg-cyan-500 text-black font-semibold px-3 py-1 rounded shadow">View course</a>
-          <form action="/enroll/<%= course.id %>" method="POST">
-            <button type="submit" class="bg-green-700 hover:bg-green-800 text-white font-semibold px-3 py-1 rounded shadow">
+        <div class="flex gap-4">
+          <a href="/courses/<%= course.id %>/chapters" class="w-1/2 bg-cyan-400 hover:bg-cyan-500 text-black font-semibold px-4 py-2 rounded shadow text-center">
+            View course
+          </a>
+          <form action="/enroll/<%= course.id %>" method="POST" class="w-1/2">
+            <button type="submit" class="w-full bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-2 rounded shadow">
               Enroll
             </button>
           </form>
