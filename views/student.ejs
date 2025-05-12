@@ -21,56 +21,9 @@
   <!-- My Courses Section -->
   <h2 class="text-xl font-semibold mb-4">My Courses</h2>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-    <!-- Demo Enrolled Course -->
-    <div class="border p-4 rounded shadow">
-      <h3 class="text-lg font-semibold mb-2">Web Development</h3>
-      <p class="text-gray-600">Instructor: Jane Smith</p>
-      <div class="flex items-center text-gray-700 my-2">
-        <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M10 2a6 6 0 00-6 6v3a4 4 0 00-2 3.464V16h16v-1.536A4 4 0 0016 11V8a6 6 0 00-6-6z"/>
-        </svg>
-        142 studentsaw
-      </div>
-      <button class="bg-cyan-400 text-black px-3 py-1 rounded">View Course</button>
-    </div>
-  </div>
 
   <hr class="my-8">
-
-  <!-- Available Courses Section -->
   <h2 class="text-xl font-semibold mb-4">Available Courses</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- Available Course 1 -->
-    <div class="border p-4 rounded shadow">
-      <h3 class="text-lg font-semibold mb-2">Machine Learning</h3>
-      <p class="text-gray-600">Instructor: Alan Turing</p>
-      <div class="flex items-center text-gray-700 my-2">
-        <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M10 2a6 6 0 00-6 6v3a4 4 0 00-2 3.464V16h16v-1.536A4 4 0 0016 11V8a6 6 0 00-6-6z"/>
-        </svg>
-        312 students
-      </div>
-      <div class="flex space-x-2">
-        <button class="bg-cyan-400 text-black px-3 py-1 rounded">View Course</button>
-        <button class="bg-green-500 text-white px-3 py-1 rounded">Enroll</button>
-      </div>
-    </div>
-
-    <!-- Available Course 2 -->
-    <div class="border p-4 rounded shadow">
-      <h3 class="text-lg font-semibold mb-2">Data Structures</h3>
-      <p class="text-gray-600">Instructor: Grace Hopper</p>
-      <div class="flex items-center text-gray-700 my-2">
-        <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M10 2a6 6 0 00-6 6v3a4 4 0 00-2 3.464V16h16v-1.536A4 4 0 0016 11V8a6 6 0 00-6-6z"/>
-        </svg>
-        187 students
-      </div>
-      <div class="flex space-x-2">
-        <button class="bg-cyan-400 text-black px-3 py-1 rounded">View Course</button>
-        <button class="bg-green-500 text-white px-3 py-1 rounded">Enroll</button>
-      </div>
-    </div>
-  </div>
+  <%- include('courses', { messages: messages }) %>
 </body>
 </html>
