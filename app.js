@@ -11,6 +11,7 @@ const { Op } = require("sequelize");
 const { title } = require("process");
 const chapter = require("./models/chapter");
 const Sequelize = require("sequelize");
+const PageCompletion = require("./models").PageCompletion;
 
 const app = express();
 
@@ -1024,6 +1025,159 @@ app.get(
       console.error("Failed to load chapters:", err);
       req.flash("error", "Failed to load chapters.");
       res.redirect("/Student");
+    }
+  }
+);
+
+app.get(
+  "/student/chapters/:chapterId/pages",
+  ensureRole("student"),
+  async (req, res) => {
+    try {
+      const chapterId = req.params.chapterId;
+      const userId = req.session.user.id;
+
+      // Fetch the chapter and its course
+      const chapter = await Chapter.findByPk(chapterId, {
+        include: {
+          model: Course,
+          attributes: ["id", "coursename"],
+        },
+      });
+
+      if (!chapter) {
+        req.flash("error", "Chapter not found.");
+        return res.redirect("/Student");
+      }
+
+      const courseId = chapter.courseId;
+
+      // Check if user is enrolled in the course
+      const enrollment = await UserCourses.findOne({
+        where: { userId, courseId },
+      });
+
+      if (!enrollment) {
+        req.flash("error", "You are not enrolled in this course.");
+        return res.redirect("/Student");
+      }
+
+      // Fetch pages of this chapter
+      const pages = await Page.findAll({
+        where: { chapterId },
+        order: [["id", "ASC"]],
+      });
+
+      res.render("student-page", {
+        title: "Pages",
+        chapter: {
+          id: chapter.id,
+          chaptername: chapter.chaptername,
+          description: chapter.description,
+          courseId: chapter.courseId,
+          coursename: chapter.Course?.coursename || "Course",
+        },
+        pages,
+        user: req.session.user,
+      });
+    } catch (err) {
+      console.error("Failed to load chapter pages:", err);
+      req.flash("error", "Failed to load pages.");
+      res.redirect("/Student");
+    }
+  }
+);
+
+app.get("/student/page/:id", ensureRole("student"), async (req, res) => {
+  const pageId = req.params.id;
+  const userId = req.session.user.id;
+
+  try {
+    const page = await Page.findByPk(pageId, {
+      include: {
+        model: Chapter,
+        include: Course,
+      },
+    });
+
+    if (!page) {
+      req.flash("error", "Page not found.");
+      return res.redirect("/Student");
+    }
+
+    const chapter = page.Chapter;
+    const course = chapter?.Course;
+
+    // Check enrollment
+    const enrolled = await UserCourses.findOne({
+      where: { userId, courseId: course.id },
+    });
+
+    if (!enrolled) {
+      req.flash("error", "You are not enrolled in this course.");
+      return res.redirect("/Student");
+    }
+
+    // Get page list to determine prev/next
+    const allPages = await Page.findAll({
+      where: { chapterId: chapter.id },
+      order: [["id", "ASC"]],
+    });
+
+    const index = allPages.findIndex((p) => p.id === page.id);
+    const prevPage = index > 0 ? allPages[index - 1] : null;
+    const nextPage = index < allPages.length - 1 ? allPages[index + 1] : null;
+
+    // Check completion
+    const completed = await PageCompletion.findOne({
+      where: { userId, pageId },
+    });
+
+    res.render("student-pageview", {
+      title: "Page View",
+      page: {
+        id: page.id,
+        title: page.title,
+        content: page.content,
+        completed: !!completed,
+      },
+      ch: {
+        id: chapter.id,
+        chaptername: chapter.chaptername,
+        courseId: course.id,
+      },
+      prevPage,
+      nextPage,
+      user: req.session.user,
+    });
+  } catch (err) {
+    console.error("Page load error:", err);
+    req.flash("error", "Unable to load page.");
+    res.redirect("/Student");
+  }
+});
+
+app.post(
+  "/student/markCompleted/:id",
+  ensureRole("student"),
+  async (req, res) => {
+    const pageId = req.params.id;
+    const userId = req.session.user.id;
+
+    try {
+      const existing = await PageCompletion.findOne({
+        where: { userId, pageId },
+      });
+
+      if (!existing) {
+        await PageCompletion.create({ userId, pageId });
+      }
+
+      res.redirect("/student/page/" + pageId);
+    } catch (err) {
+      console.error("Completion error:", err);
+      req.flash("error", "Could not mark page as completed.");
+      res.redirect("/student/page/" + pageId);
     }
   }
 );
