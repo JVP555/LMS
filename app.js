@@ -272,77 +272,11 @@ app.post("/courses", ensureRole("educator"), async (req, res) => {
       userId: req.session.user.id,
     });
     req.flash("success", "Course created successfully.");
-    res.redirect(`/newchapter/${newCourse.id}`);
+    res.redirect(`/my-chapters/${newCourse.id}`);
   } catch (err) {
     console.error(err);
     req.flash("error", "Failed to create course.");
     res.redirect("/courses/new");
-  }
-});
-
-// Chapter Creation
-app.get("/newchapter/:courseId", ensureRole("educator"), (req, res) => {
-  res.render("Educator/create-chapter", {
-    title: "Create New Chapter",
-    chapter: null,
-    courseId: req.params.courseId,
-    messages: { error: req.flash("error"), success: req.flash("success") },
-  });
-});
-
-app.post("/newchapter/:courseId", ensureRole("educator"), async (req, res) => {
-  const { chaptername, description } = req.body;
-  const courseId = req.params.courseId;
-
-  try {
-    const course = await Course.findByPk(courseId);
-    if (!course) {
-      req.flash("error", "Course not found.");
-      return res.redirect(`/newchapter/${courseId}`);
-    }
-
-    const chapter = await Chapter.create({
-      chaptername,
-      description,
-      courseId,
-    });
-    req.flash("success", "Chapter created successfully.");
-    res.redirect(`/newpage/${chapter.id}`);
-  } catch (err) {
-    console.error(err);
-    req.flash("error", "Failed to create chapter.");
-    res.redirect(`/newchapter/${courseId}`);
-  }
-});
-
-// Page Creation
-app.get("/newpage/:chapterId", ensureRole("educator"), (req, res) => {
-  res.render("Educator/create-page", {
-    title: "Create New Page",
-    page: {},
-    chapterId: req.params.chapterId,
-    messages: { error: req.flash("error"), success: req.flash("success") },
-  });
-});
-
-app.post("/newpage/:chapterId", ensureRole("educator"), async (req, res) => {
-  const { title, content } = req.body;
-  const chapterId = req.params.chapterId;
-
-  try {
-    const chapter = await Chapter.findByPk(chapterId);
-    if (!chapter) {
-      req.flash("error", "Chapter not found.");
-      return res.redirect(`/newpage/${chapterId}`);
-    }
-
-    const page = await Page.create({ title, content, chapterId });
-    req.flash("success", "Page created successfully.");
-    res.redirect(`/page/${page.id}`);
-  } catch (err) {
-    console.error(err);
-    req.flash("error", "Failed to create page.");
-    res.redirect(`/newpage/${chapterId}`);
   }
 });
 
@@ -698,19 +632,37 @@ app.get(
   "/my-courses/:courseId/my-chapters/new",
   ensureLoggedIn,
   ensureRole("educator"),
-  (req, res) => {
+  async (req, res) => {
     const courseId = req.params.courseId;
-    res.render("Educator/create-chapter", {
-      title: "Create Chapter",
-      courseId: courseId,
-      chapter: null,
-      messages: {
-        error: req.flash("error"),
-        success: req.flash("success"),
-      }, // Add this to ensure chapter is always defined
-    });
+
+    try {
+      const course = await Course.findByPk(courseId, {
+        attributes: ["id", "coursename"],
+      });
+
+      if (!course) {
+        req.flash("error", "Course not found.");
+        return res.redirect("/my-courses");
+      }
+
+      res.render("Educator/create-chapter", {
+        title: "Create New Chapter",
+        courseId: courseId,
+        course, // ✅ pass course to the view
+        chapter: null,
+        messages: {
+          error: req.flash("error"),
+          success: req.flash("success"),
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      req.flash("error", "Failed to load course.");
+      res.redirect("/my-courses");
+    }
   }
 );
+
 app.post(
   "/my-courses/:courseId/my-chapters",
   ensureLoggedIn,
@@ -720,14 +672,14 @@ app.post(
     try {
       const { chaptername, description } = req.body;
 
-      // Add logic to create a new chapter in the database
-      const chapter = await Chapter.create({
-        courseId: courseId,
-        chaptername: chaptername,
-        description: description,
+      await Chapter.create({
+        courseId,
+        chaptername,
+        description,
       });
-      res.redirect(`/my-chapters/${courseId}`);
-      // Redirect to the passed redirect URL or default to the course chapters page
+
+      req.flash("success", "Chapter created successfully.");
+      res.redirect(`/my-chapters/${courseId}`); // 👈 redirect to where the request came from
     } catch (err) {
       console.error(err);
       req.flash("error", "Failed to create chapter.");
@@ -745,20 +697,27 @@ app.get(
       const { chapterId } = req.params;
 
       const chapter = await Chapter.findByPk(chapterId, {
-        include: [{ model: Course }],
+        include: {
+          model: Course,
+          attributes: ["id", "coursename", "userId"],
+        },
       });
 
-      if (!chapter || chapter.Course.userId !== req.session.user.id) {
-        req.flash("error", "You cannot edit this chapter.");
-        return res.redirect("/educator");
+      if (!chapter) {
+        req.flash("error", "Chapter not found.");
+        return res.redirect("/Educator");
       }
 
-      const courseId = chapter.Course.id;
+      if (chapter.Course.userId !== req.session.user.id) {
+        req.flash("error", "You cannot edit this chapter.");
+        return res.redirect("/Educator");
+      }
 
       res.render("Educator/create-chapter", {
         title: "Edit Chapter",
         chapter,
-        courseId,
+        courseId: chapter.Course.id,
+        course: chapter.Course,
         messages: {
           error: req.flash("error"),
           success: req.flash("success"),
@@ -767,7 +726,7 @@ app.get(
     } catch (err) {
       console.error(err);
       req.flash("error", "Failed to load chapter for editing.");
-      res.redirect("/educator");
+      res.redirect("/Educator");
     }
   }
 );
@@ -877,16 +836,24 @@ app.get(
   async (req, res) => {
     const chapterId = req.params.chapterId;
     try {
-      const chapter = await Chapter.findByPk(chapterId);
+      const chapter = await Chapter.findByPk(chapterId, {
+        attributes: ["id", "chaptername"],
+        include: {
+          model: Course,
+          attributes: ["id", "coursename"],
+        },
+      });
+
       if (!chapter) {
         req.flash("error", "Chapter not found.");
         return res.redirect("/Educator");
       }
 
       res.render("Educator/create-page", {
-        title: "Create Page",
+        title: "Create New Page",
         page: {},
         chapterId,
+        chapter, // ✅ passing chapter with associated course
         messages: {
           error: req.flash("error"),
           success: req.flash("success"),
@@ -899,6 +866,7 @@ app.get(
     }
   }
 );
+
 app.post(
   "/my-chapter/:chapterId/my-pages",
   ensureRole("educator"),
@@ -933,7 +901,17 @@ app.post(
 app.get("/pages/:pageId/edit", ensureRole("educator"), async (req, res) => {
   const pageId = req.params.pageId;
   try {
-    const page = await Page.findByPk(pageId);
+    const page = await Page.findByPk(pageId, {
+      include: {
+        model: Chapter,
+        attributes: ["id", "chaptername"],
+        include: {
+          model: Course,
+          attributes: ["id", "coursename"],
+        },
+      },
+    });
+
     if (!page) {
       req.flash("error", "Page not found.");
       return res.redirect("/Educator");
@@ -942,6 +920,8 @@ app.get("/pages/:pageId/edit", ensureRole("educator"), async (req, res) => {
     res.render("Educator/create-page", {
       title: "Edit Page",
       page,
+      chapterId: page.Chapter.id,
+      chapter: page.Chapter,
       user: req.session.user,
       messages: {
         error: req.flash("error"),

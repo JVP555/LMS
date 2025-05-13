@@ -1,56 +1,59 @@
-<%
-// title: "Edit Course" or "Create Course" (set in controller)
-// courseId: only provided if editing
-// courseName: course name string
-%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-8 font-sans">
-  <div class="max-w-xl mx-auto bg-white p-6 rounded shadow">
-    <h1 class="text-2xl font-bold mb-4"><%= title %></h1>
+<body class="bg-gray-100 font-sans">
+  <%- include('../General/notifications', { messages: messages }) %>
 
-    <%- include('../General/notifications', { messages: messages }) %>
+
+
+
+    
 
     <% let actionUrl; %>
     <% if (title === 'Edit Course') { %>
+      <div class="mt-3 px-6">
+        <nav class="text-l mb-2">
+          <a href="/Educator" class="underline text-blue-600 ml-5">Dashboard</a> &gt;
+          <span class="text-black-600">Edit Course</span>
+        </nav>
+        <hr class="mb-6 border-t-2 border-gray-300">
+      </div>
       <% actionUrl = `/courses/${courseId}` + (redirectTo ? `?redirectTo=${redirectTo}` : '') %>
     <% } else { %>
+      <div class="mt-3 px-6">
+        <nav class="text-l mb-2">
+          <a href="/Educator" class="underline text-blue-600 ml-5">Dashboard</a> &gt;
+          <span class="text-black-600">Create New Course</span>
+        </nav>
+        <hr class="mb-6 border-t-2 border-gray-300">
+      </div>
       <% actionUrl = '/courses' %>
     <% } %>
-
-    <form 
-      action="<%= actionUrl %>"
-      method="POST" 
-      class="space-y-4"
-    >
+  <div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
+    <h1 class="text-3xl font-semibold text-gray-800 mb-6 text-center"><%= title %></h1>
+    <form action="<%= actionUrl %>" method="POST" class="space-y-6">
       <div>
-        <label for="coursename" class="block">Course Name</label>
+        <label for="coursename" class="block mb-1 text-gray-700 font-medium">Course Name</label>
         <input 
           type="text" 
           id="coursename" 
           name="coursename" 
           value="<%= typeof courseName !== 'undefined' ? courseName : '' %>"
           required 
-          class="w-full border px-4 py-2 rounded" 
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
         />
       </div>
 
-      <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-        <%= title %>
-      </button>
+      <div class="flex justify-between items-center">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition">
+          <%= title %>
+        </button>
+      </div>
     </form>
-
-    <!-- Go Back Button -->
-    <div class="mt-6">
-      <button onclick="window.history.back()" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700">
-        Go Back
-      </button>
-    </div>
   </div>
 </body>
 </html>
