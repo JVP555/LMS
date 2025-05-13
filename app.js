@@ -373,7 +373,7 @@ app.get("/page/:pageId", ensureLoggedIn, async (req, res) => {
       order: [["id", "DESC"]],
     });
 
-    res.render("page", {
+    res.render("educator-pageview", {
       title: page.title,
       user: req.session.user,
       page,
@@ -420,7 +420,7 @@ app.get("/courses/:courseId/chapters", ensureLoggedIn, async (req, res) => {
   try {
     const chapters = await Chapter.findAll({ where: { courseId } });
     const course = await Course.findByPk(courseId);
-    res.render("chapters", {
+    res.render("educator-chapter", {
       title: "Chapters",
       course,
       chapters,
@@ -445,7 +445,7 @@ app.get("/chapters/:chapterId/pages", ensureLoggedIn, async (req, res) => {
 
     const pages = await Page.findAll({ where: { chapterId } });
 
-    res.render("pages", {
+    res.render("educator-page", {
       title: "Pages",
       chapter,
       pages,
@@ -486,7 +486,7 @@ app.get("/my-courses", ensureLoggedIn, async (req, res) => {
     });
 
     // Render the view with enrollment counts
-    res.render("courses", {
+    res.render("educator-course", {
       title: "My Courses",
       courses: myCourses,
       user: req.session.user,
@@ -600,7 +600,7 @@ app.get("/my-chapters/:courseId", ensureRole("educator"), async (req, res) => {
       where: { courseId },
     });
 
-    res.render("chapters", {
+    res.render("educator-chapter", {
       title: "My Chapters",
       course,
       chapters,
@@ -776,7 +776,7 @@ app.get(
 
       const pages = await Page.findAll({ where: { chapterId } });
 
-      res.render("pages", {
+      res.render("educator-page", {
         title: "My Pages",
         chapter,
         pages,
