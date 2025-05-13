@@ -49,6 +49,8 @@
 
     <!-- Form -->
     <form method="POST" action="<%= formAction %>">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
       <!-- Chapter Name -->
       <div class="mb-4">
         <label for="chaptername" class="block text-lg font-medium text-gray-700 mb-2">Chapter Name:</label>

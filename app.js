@@ -9,7 +9,6 @@ const path = require("path");
 const { User, Course, Chapter, Page, UserCourses } = require("./models");
 const { Op } = require("sequelize");
 const { title } = require("process");
-const chapter = require("./models/chapter");
 const Sequelize = require("sequelize");
 const PageCompletion = require("./models").PageCompletion;
 
@@ -19,6 +18,14 @@ const app = express();
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+const csrf = require("csurf");
+const cookieParser = require("cookie-parser");
+
+app.use(cookieParser());
+
+// Add CSRF middleware (after session + cookieParser)
+app.use(csrf({ cookie: true }));
 
 app.use(
   session({
@@ -34,6 +41,11 @@ app.use(flash());
 // View Engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
 
 // Middleware: Role-based and logged-in checks
 function ensureRole(role) {

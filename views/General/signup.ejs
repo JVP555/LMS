@@ -15,6 +15,8 @@
     <%- include('notifications', { messages: messages }) %>
 
     <form id="signup-form" class="space-y-4" method="POST" action="/userssignup">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
       <!-- Role selection buttons -->
       <div>
         <p id="role-error" class="bg-red-100 text-red-800 px-4 py-2 mb-4 rounded text-red-500 text-sm hidden my-1">Please select a proper Role</p>

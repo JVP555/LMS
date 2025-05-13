@@ -64,6 +64,7 @@
           </div>
           <div class="flex justify-center items-center w-full mt-4">          
             <form action="/enroll/<%= course.id %>" method="POST" class="w-1/2">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <button type="submit" class="w-full bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-2 rounded shadow">
                     Enroll
                 </button>

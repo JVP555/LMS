@@ -101,6 +101,8 @@
 
     <% if (user && user.id === page.Chapter.Course.userId) { %>
       <form action="/markCompleted/<%= page.id %>" method="POST" class="w-40 text-center">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
         <button type="submit"
           class="w-full whitespace-nowrap font-medium px-3 py-2 rounded shadow h-full text-white
           <%= page.completed

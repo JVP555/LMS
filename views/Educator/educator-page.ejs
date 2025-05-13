@@ -74,6 +74,8 @@
                 Edit
               </a>
               <form action="/pages/<%= page.id %>/delete?redirectTo=/my-chapters/<%= chapter.id %>/my-pages" method="POST" onClick="event.stopPropagation();">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
                 <button type="submit" class="text-red-600 hover:text-red-800">Delete</button>
               </form>
             </div>

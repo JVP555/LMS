@@ -17,6 +17,8 @@
     <%- include('notifications', { messages: messages }) %>
 
     <form id="signin-form" class="space-y-4" method="POST" action="/userssignin">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
       <!-- Role selection buttons -->
       <div>
         <div class="flex justify-between">

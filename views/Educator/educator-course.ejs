@@ -45,6 +45,8 @@
                 </svg>
               </a>
               <form action="/courses/<%= course.id %>/delete?redirectTo=<%= title === 'My Courses' ? '/my-courses' : '/courses' %>" method="POST" class="inline-block">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
                 <button type="submit" class="text-red-500 hover:text-red-700">
                   <!-- Delete icon -->
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 pt-1" viewBox="0 0 100 100">

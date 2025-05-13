@@ -70,6 +70,8 @@
             Edit
           </a>
           <form action="/chapters/<%= ch.id %>/delete?redirectTo=/my-chapters/<%= course.id %>" method="POST" onClick="event.stopPropagation();">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
             <button type="submit" class="text-red-600 hover:text-red-800">Delete</button>
           </form>
         </div>
