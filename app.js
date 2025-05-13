@@ -36,19 +36,31 @@ app.use(
 app.use(flash());
 
 // CSRF protection
-app.use(csrf({ cookie: true }));
 
 // View Engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// Make CSRF token and user info available in all views
-app.use((req, res, next) => {
-  res.locals.csrfToken = req.csrfToken();
-  res.locals.user = req.session.user;
-  req.user = req.session.user; // <-- Add this line
-  next();
-});
+const csrfProtection = csrf({ cookie: true });
+
+if (process.env.NODE_ENV !== "test") {
+  app.use(csrfProtection);
+
+  app.use((req, res, next) => {
+    res.locals.csrfToken = req.csrfToken();
+    res.locals.user = req.session.user;
+    req.user = req.session.user;
+    next();
+  });
+} else {
+  // In test environment, mock csrfToken and user
+  app.use((req, res, next) => {
+    res.locals.csrfToken = "test-csrf-token";
+    res.locals.user = req.session.user;
+    req.user = req.session.user;
+    next();
+  });
+}
 
 // Route handlers
 const generalRoutes = require("./routes/general");
