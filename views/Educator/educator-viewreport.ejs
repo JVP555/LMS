@@ -40,7 +40,9 @@
               <td class="px-4 py-2">
                 <div class="flex items-center gap-2">
                   <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <% if (typeof report.percentage !== "undefined") { %>
                     <div class="bg-green-500 h-2.5 rounded-full" style="width: <%= report.percentage %>%"></div>
+                    <% } %>
                   </div>
                   <span class="text-sm text-gray-600 whitespace-nowrap"><%= report.percentage %>%</span>
                 </div>
