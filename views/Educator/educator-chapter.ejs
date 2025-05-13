@@ -17,6 +17,7 @@
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col ml-5 mr-5">
+  <%- include('../General/notifications', { messages: messages }) %>
 
   <h1 class="text-2xl font-bold mb-4 mt-3 text-gray-800">
     <%= title %> in <%= course.coursename %>

@@ -16,6 +16,7 @@
 
 <% if (title === 'My Courses') { %>
   <header class="text-center my-6">
+    <%- include('../General/notifications', { messages: messages }) %>
     <h1 class="text-3xl font-bold underline text-gray-800">My Courses</h1>
   </header>
 <% } %>

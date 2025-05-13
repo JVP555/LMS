@@ -49,7 +49,7 @@ function ensureLoggedIn(req, res, next) {
 }
 
 // Routes
-
+//________________________General_________________________________________________________-
 app.get("/", (req, res) => {
   if (req.session.user) {
     return res.redirect(
@@ -57,7 +57,7 @@ app.get("/", (req, res) => {
     );
   }
 
-  res.render("index", {
+  res.render("General/index", {
     title: "LMS",
     messages: { error: req.flash("error"), success: req.flash("success") },
   });
@@ -65,7 +65,7 @@ app.get("/", (req, res) => {
 
 // Auth: Sign Up
 app.get("/signup", (req, res) => {
-  res.render("signup", {
+  res.render("General/signup", {
     title: "Sign Up",
     messages: { error: req.flash("error"), success: req.flash("success") },
   });
@@ -101,7 +101,7 @@ app.post("/userssignup", async (req, res) => {
 
 // Auth: Sign In
 app.get("/signin", (req, res) => {
-  res.render("signin", {
+  res.render("General/signin", {
     title: "Sign In",
     messages: { error: req.flash("error"), success: req.flash("success") },
   });
@@ -146,42 +146,6 @@ app.post("/userssignin", async (req, res) => {
   }
 });
 
-// Educator Dashboard
-app.get("/Educator", ensureRole("educator"), async (req, res) => {
-  const courses = await Course.findAll({
-    include: {
-      model: User,
-      attributes: ["firstname", "lastname"],
-    },
-  });
-
-  // Get enrollment counts for all courses
-  const enrollments = await UserCourses.findAll({
-    attributes: [
-      "courseId",
-      [Sequelize.fn("COUNT", Sequelize.col("userId")), "count"],
-    ],
-    group: ["courseId"],
-    raw: true,
-  });
-
-  const enrollmentMap = {};
-  enrollments.forEach((e) => {
-    enrollmentMap[e.courseId] = parseInt(e.count);
-  });
-
-  res.render("educator", {
-    title: "Educator Dashboard",
-    user: req.session.user,
-    courses,
-    enrollmentMap, // <- pass it
-    messages: {
-      error: req.flash("error"),
-      success: req.flash("success"),
-    },
-  });
-});
-
 app.get("/changepassword/:userId", ensureLoggedIn, async (req, res) => {
   const { userId } = req.params;
 
@@ -191,7 +155,7 @@ app.get("/changepassword/:userId", ensureLoggedIn, async (req, res) => {
     return res.redirect("/");
   }
 
-  res.render("change-password", {
+  res.render("General/change-password", {
     title: "Change Password",
     user: req.session.user,
     messages: {
@@ -251,9 +215,49 @@ app.post("/changepassword/:userId", ensureLoggedIn, async (req, res) => {
   }
 });
 
+//____________________________________________-------------------------------_________________________________________________-
+
+//____________________________________________Educator Dashboard_________________________________________________
+
+// Educator Dashboard
+app.get("/Educator", ensureRole("educator"), async (req, res) => {
+  const courses = await Course.findAll({
+    include: {
+      model: User,
+      attributes: ["firstname", "lastname"],
+    },
+  });
+
+  // Get enrollment counts for all courses
+  const enrollments = await UserCourses.findAll({
+    attributes: [
+      "courseId",
+      [Sequelize.fn("COUNT", Sequelize.col("userId")), "count"],
+    ],
+    group: ["courseId"],
+    raw: true,
+  });
+
+  const enrollmentMap = {};
+  enrollments.forEach((e) => {
+    enrollmentMap[e.courseId] = parseInt(e.count);
+  });
+
+  res.render("Educator/educator", {
+    title: "Educator Dashboard",
+    user: req.session.user,
+    courses,
+    enrollmentMap, // <- pass it
+    messages: {
+      error: req.flash("error"),
+      success: req.flash("success"),
+    },
+  });
+});
+
 // Course Creation
 app.get("/courses/new", ensureRole("educator"), (req, res) => {
-  res.render("create-course", {
+  res.render("Educator/create-course", {
     title: "Create Course",
     user: req.session.user,
     messages: { error: req.flash("error"), success: req.flash("success") },
@@ -278,7 +282,7 @@ app.post("/courses", ensureRole("educator"), async (req, res) => {
 
 // Chapter Creation
 app.get("/newchapter/:courseId", ensureRole("educator"), (req, res) => {
-  res.render("create-chapter", {
+  res.render("Educator/create-chapter", {
     title: "Create New Chapter",
     chapter: null,
     courseId: req.params.courseId,
@@ -313,7 +317,7 @@ app.post("/newchapter/:courseId", ensureRole("educator"), async (req, res) => {
 
 // Page Creation
 app.get("/newpage/:chapterId", ensureRole("educator"), (req, res) => {
-  res.render("create-page", {
+  res.render("Educator/create-page", {
     title: "Create New Page",
     page: {},
     chapterId: req.params.chapterId,
@@ -373,7 +377,7 @@ app.get("/page/:pageId", ensureLoggedIn, async (req, res) => {
       order: [["id", "DESC"]],
     });
 
-    res.render("educator-pageview", {
+    res.render("Educator/educator-pageview", {
       title: page.title,
       user: req.session.user,
       page,
@@ -420,7 +424,7 @@ app.get("/courses/:courseId/chapters", ensureLoggedIn, async (req, res) => {
   try {
     const chapters = await Chapter.findAll({ where: { courseId } });
     const course = await Course.findByPk(courseId);
-    res.render("educator-chapter", {
+    res.render("Educator/educator-chapter", {
       title: "Chapters",
       course,
       chapters,
@@ -445,7 +449,7 @@ app.get("/chapters/:chapterId/pages", ensureLoggedIn, async (req, res) => {
 
     const pages = await Page.findAll({ where: { chapterId } });
 
-    res.render("educator-page", {
+    res.render("Educator/educator-page", {
       title: "Pages",
       chapter,
       pages,
@@ -486,7 +490,7 @@ app.get("/my-courses", ensureLoggedIn, async (req, res) => {
     });
 
     // Render the view with enrollment counts
-    res.render("educator-course", {
+    res.render("Educator/educator-course", {
       title: "My Courses",
       courses: myCourses,
       user: req.session.user,
@@ -515,7 +519,7 @@ app.get("/courses/:courseId/edit", ensureRole("educator"), async (req, res) => {
       return res.redirect(redirectTo);
     }
 
-    res.render("create-course", {
+    res.render("Educator/create-course", {
       title: "Edit Course",
       course,
       courseId,
@@ -600,7 +604,7 @@ app.get("/my-chapters/:courseId", ensureRole("educator"), async (req, res) => {
       where: { courseId },
     });
 
-    res.render("educator-chapter", {
+    res.render("Educator/educator-chapter", {
       title: "My Chapters",
       course,
       chapters,
@@ -623,7 +627,7 @@ app.get(
   ensureRole("educator"),
   (req, res) => {
     const courseId = req.params.courseId;
-    res.render("create-chapter", {
+    res.render("Educator/create-chapter", {
       title: "Create Chapter",
       courseId: courseId,
       chapter: null,
@@ -678,7 +682,7 @@ app.get(
 
       const courseId = chapter.Course.id;
 
-      res.render("create-chapter", {
+      res.render("Educator/create-chapter", {
         title: "Edit Chapter",
         chapter,
         courseId,
@@ -776,7 +780,7 @@ app.get(
 
       const pages = await Page.findAll({ where: { chapterId } });
 
-      res.render("educator-page", {
+      res.render("Educator/educator-page", {
         title: "My Pages",
         chapter,
         pages,
@@ -806,7 +810,7 @@ app.get(
         return res.redirect("/Educator");
       }
 
-      res.render("create-page", {
+      res.render("Educator/create-page", {
         title: "Create Page",
         page: {},
         chapterId,
@@ -862,7 +866,7 @@ app.get("/pages/:pageId/edit", ensureRole("educator"), async (req, res) => {
       return res.redirect("/Educator");
     }
 
-    res.render("create-page", {
+    res.render("Educator/create-page", {
       title: "Edit Page",
       page,
       user: req.session.user,
@@ -943,7 +947,7 @@ app.post("/pages/:pageId/delete", ensureRole("educator"), async (req, res) => {
 });
 
 //student
-
+//______________________________________________Student Dashboard_________________________________________
 app.get("/Student", ensureRole("student"), async (req, res) => {
   try {
     const userId = req.session.user.id;
@@ -1036,7 +1040,7 @@ app.get("/Student", ensureRole("student"), async (req, res) => {
     }
 
     // ✅ Render dashboard with progress info
-    res.render("student", {
+    res.render("Student/student", {
       title: "Student Dashboard",
       user: req.session.user,
       enrolledCourses: user.enrolledCourses,
@@ -1124,7 +1128,7 @@ app.get(
 
       const enrolledCourseIds = enrollments.map((e) => e.courseId);
 
-      res.render("student-chapter", {
+      res.render("Student/student-chapter", {
         title: "Course Chapters",
         course,
         chapters,
@@ -1183,7 +1187,7 @@ app.get(
         order: [["id", "ASC"]],
       });
 
-      res.render("student-page", {
+      res.render("Student/student-page", {
         title: "Pages",
         chapter: {
           id: chapter.id,
@@ -1248,7 +1252,7 @@ app.get("/student/page/:id", ensureRole("student"), async (req, res) => {
       where: { userId, pageId },
     });
 
-    res.render("student-pageview", {
+    res.render("Student/student-pageview", {
       title: "Page View",
       page: {
         id: page.id,

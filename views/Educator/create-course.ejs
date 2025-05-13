@@ -14,7 +14,8 @@
   <div class="max-w-xl mx-auto bg-white p-6 rounded shadow">
     <h1 class="text-2xl font-bold mb-4"><%= title %></h1>
 
-    <%- include('notifications', { messages: messages }) %>
+    <%- include('../General/notifications', { messages: messages }) %>
+
     <% let actionUrl; %>
     <% if (title === 'Edit Course') { %>
       <% actionUrl = `/courses/${courseId}` + (redirectTo ? `?redirectTo=${redirectTo}` : '') %>
