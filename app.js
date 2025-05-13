@@ -968,6 +968,63 @@ app.post("/pages/:pageId/delete", ensureRole("educator"), async (req, res) => {
     res.redirect(redirectTo);
   }
 });
+// View Report for a Course
+app.get("/educator/viewreport", ensureRole("educator"), async (req, res) => {
+  try {
+    const educatorId = req.session.user.id;
+
+    // Step 1: Get all courses created by this educator
+    const educatorCourses = await Course.findAll({
+      where: { userId: educatorId },
+    });
+
+    const educatorCourseIds = educatorCourses.map((c) => c.id);
+
+    // Step 2: Count enrollments in each educator course
+    const courseEnrollmentMap = {};
+    for (const courseId of educatorCourseIds) {
+      const count = await UserCourses.count({
+        where: { courseId },
+      });
+      courseEnrollmentMap[courseId] = count;
+    }
+
+    // Step 3: Count total number of students enrolled in any course (not just this educator’s)
+    const allEnrollments = await UserCourses.findAll({
+      attributes: ["userId"],
+    });
+    const totalStudents = allEnrollments.length;
+
+    // Step 4: Prepare report data
+    const reportData = educatorCourses.map((course) => {
+      const enrolledCount = courseEnrollmentMap[course.id] || 0;
+      const percentage =
+        totalStudents > 0
+          ? ((enrolledCount / totalStudents) * 100).toFixed(2)
+          : "0.00";
+
+      return {
+        course,
+        enrolledCount,
+        percentage,
+      };
+    });
+
+    res.render("Educator/educator-viewreport", {
+      title: "Enrollment Report",
+      user: req.session.user,
+      reportData,
+      messages: {
+        error: req.flash("error"),
+        success: req.flash("success"),
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to load reports.");
+    res.redirect("/Educator");
+  }
+});
 
 //student
 //______________________________________________Student Dashboard_________________________________________
