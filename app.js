@@ -110,17 +110,27 @@ app.get("/signin", (req, res) => {
 app.post("/userssignin", async (req, res) => {
   const { email, password, role } = req.body;
 
+  if (!role || (role !== "educator" && role !== "student")) {
+    req.flash("error", "Please select a valid role.");
+    return res.redirect("/signin");
+  }
+
   try {
     const user = await User.findOne({ where: { email } });
-    const validPassword =
-      user && (await bcrypt.compare(password, user.password));
 
-    if (!user || !validPassword) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       req.flash("error", "Invalid email or password.");
       return res.redirect("/signin");
     }
 
-    // ✅ Store plain user data in session
+    if (user.role !== role) {
+      req.flash(
+        "error",
+        `This email is registered as a ${user.role}.\nPlease select the correct role.`
+      );
+      return res.redirect("/signin");
+    }
+
     req.session.user = {
       id: user.id,
       name: user.name,
@@ -128,7 +138,6 @@ app.post("/userssignin", async (req, res) => {
       role: user.role,
     };
 
-    // ✅ Redirect based on role
     res.redirect(`/${user.role === "educator" ? "Educator" : "Student"}`);
   } catch (err) {
     console.error(err);
@@ -1013,18 +1022,22 @@ app.post("/enroll/:courseId", ensureRole("student"), async (req, res) => {
   try {
     const courseId = req.params.courseId;
     const userId = req.session.user.id;
+    const referer = req.get("referer");
 
     const existing = await UserCourses.findOne({ where: { userId, courseId } });
     if (existing) {
       req.flash("error", "Already enrolled in this course.");
-      return res.redirect(`/student/courses/${courseId}/chapters`);
+
+      // Redirect back to referer if exists, else fallback
+      return res.redirect(referer || `/student/courses/${courseId}/chapters`);
     }
 
     await UserCourses.create({ userId, courseId });
     req.flash("success", "Successfully enrolled in the course.");
-    res.redirect(`/student/courses/${courseId}/chapters`);
+
+    // Redirect back to referer if exists, else fallback
+    return res.redirect(referer || `/student/courses/${courseId}/chapters`);
   } catch (err) {
-    console.error("Enroll Error:", err);
     req.flash("error", "Enrollment failed.");
     res.redirect("/Student");
   }
