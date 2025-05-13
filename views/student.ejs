@@ -57,8 +57,8 @@
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 18V6l8 6-8 6Z"/>
               </svg>
             </a>
-            <div class="w-1/2 bg-purple-600 text-white px-4 py-2 rounded shadow text-center font-semibold">
-              Completed: 0%
+            <div class="w-1/2 bg-purple-600 text-white px-2 py-3 rounded shadow text-center font-semibold">
+              Completed: <%= completionPercentage[course.id] || 0 %>%
             </div>
           </div>
         </div>
@@ -88,11 +88,11 @@
           </div>
         </div>
         <div class="flex gap-4">
-          <a href="/student/courses/<%= course.id %>/chapters" class="w-1/2 bg-cyan-400 hover:bg-cyan-500 text-black font-semibold px-4 py-2 rounded shadow text-center">
+          <a href="/student/courses/<%= course.id %>/chapters" class="w-1/2 bg-cyan-400 hover:bg-cyan-500 text-black font-semibold px-4 py-3 rounded shadow text-center">
             View course
           </a>
           <form action="/enroll/<%= course.id %>" method="POST" class="w-1/2">
-            <button type="submit" class="w-full bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-2 rounded shadow">
+            <button type="submit" class="w-full bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-3 rounded shadow">
               Enroll
             </button>
           </form>

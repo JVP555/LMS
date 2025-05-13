@@ -888,7 +888,7 @@ app.get("/Student", ensureRole("student"), async (req, res) => {
   try {
     const userId = req.session.user.id;
 
-    // Fetch user's enrolled courses
+    // Fetch user's enrolled courses with educator info
     const user = await User.findByPk(userId, {
       include: {
         model: Course,
@@ -908,7 +908,7 @@ app.get("/Student", ensureRole("student"), async (req, res) => {
       },
     });
 
-    // Fetch enrollment counts per course
+    // Enrollment count per course
     const enrollments = await UserCourses.findAll({
       attributes: [
         "courseId",
@@ -918,7 +918,6 @@ app.get("/Student", ensureRole("student"), async (req, res) => {
       raw: true,
     });
 
-    // Convert the result into a dictionary: { courseId: count }
     const enrollmentMap = {};
     enrollments.forEach((e) => {
       enrollmentMap[e.courseId] = parseInt(e.count);
@@ -926,13 +925,65 @@ app.get("/Student", ensureRole("student"), async (req, res) => {
 
     const enrolledCourseIds = user.enrolledCourses.map((course) => course.id);
 
+    // ✅ Fetch all pages and their courseIds via Chapter
+    const allPages = await Page.findAll({
+      include: {
+        model: Chapter,
+        attributes: ["courseId"],
+      },
+    });
+
+    // Total pages per course
+    const totalPagesPerCourse = {};
+    allPages.forEach((page) => {
+      const courseId = page.Chapter?.courseId;
+      if (courseId) {
+        totalPagesPerCourse[courseId] =
+          (totalPagesPerCourse[courseId] || 0) + 1;
+      }
+    });
+
+    // ✅ Fetch user's completed pages with Chapter → courseId
+    const completions = await PageCompletion.findAll({
+      where: { userId },
+      include: [
+        {
+          model: Page,
+          include: {
+            model: Chapter,
+            attributes: ["courseId"],
+          },
+        },
+      ],
+    });
+
+    // Completed pages per course
+    const completedPagesPerCourse = {};
+    completions.forEach((comp) => {
+      const courseId = comp.Page?.Chapter?.courseId;
+      if (courseId) {
+        completedPagesPerCourse[courseId] =
+          (completedPagesPerCourse[courseId] || 0) + 1;
+      }
+    });
+
+    // Completion percentage per course
+    const completionPercentage = {};
+    for (const courseId in totalPagesPerCourse) {
+      const total = totalPagesPerCourse[courseId];
+      const completed = completedPagesPerCourse[courseId] || 0;
+      completionPercentage[courseId] = Math.round((completed / total) * 100);
+    }
+
+    // ✅ Render dashboard with progress info
     res.render("student", {
       title: "Student Dashboard",
       user: req.session.user,
       enrolledCourses: user.enrolledCourses,
       enrolledCourseIds,
       allCourses,
-      enrollmentMap, // pass this to the view
+      enrollmentMap,
+      completionPercentage, // <- pass to view
       messages: {
         error: req.flash("error"),
         success: req.flash("success"),
@@ -1175,7 +1226,6 @@ app.post(
 
       res.redirect("/student/page/" + pageId);
     } catch (err) {
-      console.error("Completion error:", err);
       req.flash("error", "Could not mark page as completed.");
       res.redirect("/student/page/" + pageId);
     }
