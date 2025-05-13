@@ -18,34 +18,58 @@
     }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body class="bg-gray-50 min-h-screen flex flex-col ml-5 mr-5">
 
 
-  <h1 class="text-2xl font-bold mb-4 mt-3 ml-5 text-gray-800">
+
     <% if (title === 'My Pages') { %>
-      <%- include('../General/notifications', { messages: messages }) %>
-      <%= title %> in <%= chapter.chaptername %>
-    <% } else { %>
-      Pages of Chapter: <%= chapter.chaptername %>
-    <% } %>
-  </h1>
+    <%- include('../General/notifications', { messages: messages }) %>
+    <div class="mt-6">
+      <nav class="text-l mb-2">
+        <a href="/Educator" class="underline text-blue-600">Dashboard</a> &gt;
+        <a href="/my-courses" class="underline text-blue-600">
+          My Courses
+        </a> &gt;
+        <a href="/my-chapters/<%= chapter.courseId %>" class="underline text-blue-600">
+          <%= chapter.Course.coursename %>
+        </a> &gt;
+        <span class="text-black-600"><%= chapter.chaptername %></span>
+      </nav>
+    </div>
+    <hr class="mb-6 border-t-2 border-gray-400">
 
-  <% if (title === 'My Pages') { %>
-    <div class="ml-5 mb-4">
+
+    <div class="mb-4">
       <a href="/my-chapter/<%= chapter.id %>/my-pages/new?redirectTo=/my-chapter/<%= chapter.id %>/my-pages" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
         + Create New Page
       </a>
     </div>
-  <% } %>
+    <h1 class="text-2xl font-bold mb-4 mt-3 text-gray-800"><%= title %> in <%= chapter.chaptername %></h1>
+    <% } else { %>
+      <div class="mt-6">
+        <nav class="text-l mb-2">
+          <a href="/Educator" class="underline text-blue-600">Dashboard</a> &gt;
+          <a href="/courses/<%= chapter.Course.id %>/chapters" class="underline text-blue-600">
+            <%= chapter.Course.coursename %>
+          </a> &gt;
+          <span class="text-black-600"><%= chapter.chaptername %></span>
+        </nav>
+      </div>
+      <hr class="mb-6 border-t-2 border-gray-400">
+      <h1 class="text-2xl font-bold mb-4 mt-3 text-gray-800">Pages of Chapter: <%= chapter.chaptername %></h1>     
+      
+    <% } %>
+  </h1>
+
 
   <% if (pages.length === 0) { %>
-    <p class="ml-5 text-gray-600">No pages found for this chapter.</p>
+    <p class="text-gray-600">No pages found for this chapter.</p>
   <% } else { %>
-    <div class="flex flex-col gap-4 px-5 mt-4 w-full md:w-2/5">
+    <div class="flex flex-col gap-4 w-full md:w-3/5 mt-4">
       <% pages.forEach(page => { %>
         <% if (title === 'My Pages') { %>
           <div 
-            onclick="window.location.href='/page/<%= page.id %>'" 
+            onclick="window.location.href='/my-page/<%= page.id %>'" 
             class="cursor-pointer flex justify-between items-center p-4 border rounded-xl shadow-md hover:shadow-lg hover:bg-gray-100 transition"
           >
             <span class="text-lg font-semibold text-blue-700"><%= page.title %></span>

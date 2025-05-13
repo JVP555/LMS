@@ -18,12 +18,17 @@
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col ml-5 mr-5">
 
-
-  <h1 class="text-2xl font-bold mb-4 mt-3 text-gray-800">
-    <%= title %> in <%= course.coursename %>
-  </h1>
-
   <% if (title === 'My Chapters') { %>
+  <div class="mt-6">
+    <nav class="text-l mb-2">
+      <a href="/Educator" class="underline text-blue-600">Dashboard</a> &gt;
+      <a href="/my-courses" class="underline text-blue-600">
+        My Courses
+      </a> &gt;
+      <span class="text-black-600"><%= course.coursename %></span>
+    </nav>
+  </div>
+  <hr class="mb-6 border-t-2 border-gray-400">
     <%- include('../General/notifications', { messages: messages }) %>
     <div class="mb-4">
       <a href="/my-courses/<%= course.id %>/my-chapters/new?redirectTo=/my-chapters/<%= course.id %>" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
@@ -31,7 +36,18 @@
       </a>
     </div>
   <% } %>
-
+  <% if (title !== 'My Chapters') { %>
+  <div class="mt-6">
+    <nav class="text-l mb-2">
+      <a href="/Educator" class="underline text-blue-600">Dashboard</a> &gt;
+      <span class="text-black-600"><%= course.coursename %></span>
+    </nav>
+  </div>
+  <hr class="mb-6 border-t-2 border-gray-400">
+  <% } %>
+  <h1 class="text-2xl font-bold mb-4 mt-3 text-gray-800">
+    <%= title %> in <%= course.coursename %>
+  </h1>
   <% if (chapters.length === 0) { %>
     <p class="text-center text-gray-600">No chapters found in this course.</p>
   <% } else { %>

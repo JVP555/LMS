@@ -25,7 +25,7 @@
     <%
       let formAction = '';
       if (title === 'Create New Chapter') {
-        formAction = '/newchapter/' + courseId;
+        formAction = '/my-courses/' + courseId + '/my-chapters';
       } else if (title === 'Create Chapter') {
         formAction = '/my-courses/' + courseId + '/my-chapters';
       } else if (title === 'Edit Chapter') {

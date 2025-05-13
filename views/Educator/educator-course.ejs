@@ -15,6 +15,12 @@
 </style>
 
 <% if (title === 'My Courses') { %>
+    <div class="mt-6">
+      <nav class="text-l mb-2">
+        <a href="/Educator" class="underline text-blue-600 ml-5">Dashboard</a> &gt;
+        <span class="text-black-600">My Courses</span>
+      </nav>
+    </div>
   <header class="text-center my-6">
     <%- include('../General/notifications', { messages: messages }) %>
     <h1 class="text-3xl font-bold underline text-gray-800">My Courses</h1>

@@ -395,10 +395,58 @@ app.get("/page/:pageId", ensureLoggedIn, async (req, res) => {
   }
 });
 
+app.get("/my-page/:pageId", ensureLoggedIn, async (req, res) => {
+  const pageId = req.params.pageId;
+  try {
+    const page = await Page.findByPk(pageId, {
+      include: [{ model: Chapter, include: [Course] }],
+    });
+
+    if (!page) {
+      req.flash("error", "Page not found.");
+      return res.redirect("/");
+    }
+
+    // Find the next page in the same chapter
+    const nextPage = await Page.findOne({
+      where: {
+        chapterId: page.chapterId,
+        id: { [Op.gt]: Number(pageId) },
+      },
+      order: [["id", "ASC"]],
+    });
+
+    // Find the previous page in the same chapter
+    const prevPage = await Page.findOne({
+      where: {
+        chapterId: page.chapterId,
+        id: { [Op.lt]: Number(pageId) },
+      },
+      order: [["id", "DESC"]],
+    });
+
+    res.render("Educator/educator-pageview", {
+      title: "My View",
+      user: req.session.user,
+      page,
+      nextPage,
+      prevPage, // Include this in the render context
+      messages: {
+        error: req.flash("error"),
+        success: req.flash("success"),
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "An error occurred while loading the page.");
+    res.redirect("/");
+  }
+});
 // Mark Page Completed
 app.post("/markCompleted/:pageId", ensureRole("educator"), async (req, res) => {
   const pageId = req.params.pageId;
   const userId = req.session.user.id;
+  const redirectTo = req.get("Referer") || `/page/${pageId}`;
 
   try {
     const page = await Page.findByPk(pageId, {
@@ -412,13 +460,12 @@ app.post("/markCompleted/:pageId", ensureRole("educator"), async (req, res) => {
 
     if (!page) {
       req.flash("error", "Page not found.");
-      return res.redirect("/");
+      return res.redirect(redirectTo);
     }
 
-    // ✅ Check if the logged-in user is the creator of the course
     if (page.Chapter.Course.userId !== userId) {
       req.flash("error", "You are not authorized to mark this page.");
-      return res.redirect(`/page/${pageId}`);
+      return res.redirect(redirectTo);
     }
 
     page.completed = !page.completed;
@@ -430,15 +477,14 @@ app.post("/markCompleted/:pageId", ensureRole("educator"), async (req, res) => {
         page.completed ? "completed" : "not completed"
       } successfully.`
     );
-
-    res.redirect(`/page/${pageId}`);
+    res.redirect(redirectTo);
   } catch (err) {
     console.error(err);
     req.flash(
       "error",
       "An error occurred while marking the page as completed."
     );
-    res.redirect(`/page/${pageId}`);
+    res.redirect(redirectTo);
   }
 });
 
@@ -464,7 +510,11 @@ app.get("/courses/:courseId/chapters", ensureLoggedIn, async (req, res) => {
 app.get("/chapters/:chapterId/pages", ensureLoggedIn, async (req, res) => {
   const chapterId = req.params.chapterId;
   try {
-    const chapter = await Chapter.findByPk(chapterId);
+    const chapter = await Chapter.findByPk(chapterId, {
+      include: {
+        model: Course,
+      },
+    });
     if (!chapter) {
       req.flash("error", "Chapter not found.");
       return res.redirect("/Educator");

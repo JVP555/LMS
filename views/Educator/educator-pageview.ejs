@@ -18,25 +18,15 @@
     }
     .fixed-buttons {
       position: fixed;
-      bottom: 55px; /* Space above footer */
+      bottom: 0px; /* Space above footer */
       left: 0;
       width: 100%;
       background-color: #ffffff;
-      padding: .35rem 0;
+      padding: .35rem 10rem;
       box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
       display: flex;
       justify-content: center;
-      gap: 1rem;
-    }
-    footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: #f3f4f6;
-      padding: .35rem 0;
-      text-align: center;
-      box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
+      gap: 10rem;
     }
     header {
       position: sticky;
@@ -47,9 +37,40 @@
     }
   </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-800">
+<body class="bg-gray-50 font-sans text-gray-800 ml-5 mr-5">
   <%- include('../General/notifications', { messages: messages }) %>
-
+    <% if (title === 'My View') { %>
+    <div class="mt-3">
+      <nav class="text-l mb-2">
+        <a href="/Educator" class="text-blue-600">Dashboard</a> &gt;
+        <a href="/my-courses" class="text-blue-600">
+          My Courses
+        </a> &gt;
+        <a href="/my-chapters/<%= page.Chapter.courseId %>" class="text-blue-600">
+          <%= page.Chapter.Course.coursename %>
+        </a> &gt;
+        <a href="/my-chapters/<%= page.Chapter.id %>/my-pages" class="text-blue-600">
+          <%= page.Chapter.chaptername %>
+        </a> &gt;
+        <span class="text-black-600"><%= page.title %></span>
+      </nav>
+    </div>
+    <hr class=" border-t-2 border-gray-400">
+    <% }else { %>
+      <div class="mt-6">
+        <nav class="text-l mb-2">
+          <a href="/Educator" class="underline text-blue-600">Dashboard</a> &gt;
+          <a href="/courses/<%= page.Chapter.Course.id %>/chapters" class="underline text-blue-600">
+            <%= page.Chapter.Course.coursename %>
+          </a> &gt;
+          <a href="/chapters/<%= page.Chapter.id %>/pages" class="underline text-blue-600">
+            <%= page.Chapter.chaptername %>
+          </a> &gt;
+          <span class="text-black-600"><%= page.title %></span>
+        </nav>
+      </div>
+      <hr class="mb-6 border-t-2 border-gray-400">
+    <% } %>
   <header class="text-center mt-8 mb-4 px-4">
     <h1 class="text-4xl font-bold"><%= page.title %></h1>
   </header>
@@ -63,11 +84,20 @@
   <!-- Fixed buttons for Previous, Mark as Completed, and Next -->
   <div class="fixed-buttons">
     <% if (prevPage) { %>
-      <a href="/page/<%= prevPage.id %>" class="w-40">
-        <button class="w-full bg-gray-300 hover:bg-gray-400 text-black font-medium px-4 py-2 rounded shadow h-full">
-          Previous Page
-        </button>
-      </a>
+      <% if (title === 'My View') { %>
+        <a href="/my-page/<%= prevPage.id %>" class="w-40">
+          <button class="w-full bg-gray-300 hover:bg-gray-400 text-black font-medium px-4 py-2 rounded shadow h-full">
+            Previous Page
+          </button>
+        </a>
+      <% } else { %>
+        <a href="/page/<%= prevPage.id %>" class="w-40">
+          <button class="w-full bg-gray-300 hover:bg-gray-400 text-black font-medium px-4 py-2 rounded shadow h-full">
+            Previous Page
+          </button>
+        </a>
+      <% } %>
+
     <% } else { %>
       <div class="w-40"></div>
     <% } %>
@@ -85,26 +115,23 @@
       </form>
     <% } %>
 
-
     <% if (nextPage) { %>
-      <a href="/page/<%= nextPage.id %>" class="w-40">
-        <button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2 rounded shadow h-full">
-          Next Page
-        </button>
-      </a>
+      <% if (title === 'My View') { %>
+        <a href="/my-page/<%= nextPage.id %>" class="w-40">
+          <button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2 rounded shadow h-full">
+            Next Page
+          </button>
+        </a>
+      <% } else { %>
+        <a href="/page/<%= nextPage.id %>" class="w-40">
+          <button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2 rounded shadow h-full">
+            Next Page
+          </button>
+        </a>
+      <% } %>
     <% } else { %>
       <div class="w-40"></div>
     <% } %>
   </div>
-
-  <footer>
-    <button onclick="window.history.back()" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition">
-      Go Back
-    </button>
-    <a href="/Educator" class="underline hover:text-gray-700 transition">
-      Back to Dashboard
-    </a>
-  </footer>
-
 </body>
 </html>
