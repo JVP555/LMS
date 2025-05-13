@@ -5,18 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
   <title><%= title %></title>
-  <style>
-    footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: #f3f4f6;
-      padding: .5rem 0;
-      text-align: center;
-      box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
-    }
-  </style>
 </head>
 <body class="bg-white min-h-screen flex flex-col px-5">
 
@@ -54,15 +42,7 @@
     </div>
   <% } %>
 
-  <!-- Footer -->
-  <footer class="mt-auto p-4 flex justify-center items-center gap-4 text-sm text-gray-500 border-t">
-    <button onclick="window.location.href='/student/courses/<%= chapter.courseId %>/chapters'" class="bg-gray-700 text-white px-5 py-2 rounded hover:bg-gray-800 transition">
-      Go Back
-    </button>
-    <a href="/student" class="underline hover:text-gray-700 transition">
-      Back to Dashboard
-    </a>
-  </footer>
+
 
 </body>
 </html>

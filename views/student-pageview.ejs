@@ -9,15 +9,10 @@
     body { display: flex; flex-direction: column; height: 100vh; }
     main { flex: 1; overflow-y: auto; padding-bottom: 120px; }
     .fixed-buttons {
-      position: fixed; bottom: 55px; left: 0; width: 100%;
+      position: fixed; bottom: 0px; left: 0; width: 100%;
       background-color: #ffffff; padding: .35rem 0;
       box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
       display: flex; justify-content: center; gap: 1rem;
-    }
-    footer {
-      position: fixed; bottom: 0; left: 0; width: 100%;
-      background-color: #f3f4f6; padding: .35rem 0;
-      text-align: center; box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
     }
     header {
       position: sticky; top: 0;
@@ -26,7 +21,18 @@
   </style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800">
-
+  <div class="mt-6">
+    <nav class="text-l mb-2">
+      <a href="/student" class="underline text-blue-600 ml-5">Home</a> &gt;
+      <a href="/student/courses/<%= ch.courseId %>/chapters" class="underline text-blue-600">
+        <%= ch.coursename || "Course" %>
+      </a> &gt;
+      <a href="/student/chapters/<%= ch.id %>/pages" class="underline text-blue-600">
+        <%= ch.chaptername || "Chapter" %>
+      </a> &gt;
+      <span class="text-black-600"><%= page.title %></span>
+    </nav>
+  </div>
   <header class="text-center mt-8 mb-4 px-4">
     <h1 class="text-4xl font-bold"><%= page.title %></h1>
   </header>
@@ -63,14 +69,5 @@
       </a>
     <% } else { %> <div class="w-40"></div> <% } %>
   </div>
-
-  <footer>
-    <button onclick="window.location.href='/student/chapters/<%= ch.id %>/pages'" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition">
-      Go Back
-    </button>
-    <a href="/student" class="underline hover:text-gray-700 transition">
-      Back to Dashboard
-    </a>
-  </footer>
 </body>
 </html>

@@ -26,7 +26,7 @@
     <p class="text-center text-gray-600">No courses found.</p>
   <% } else { %>  
     <% courses.forEach(course => { %>
-      <div class="border p-4 rounded shadow-md">
+      <div class="border border-black p-4 rounded shadow-md">
         <div class="flex justify-between items-center mb-2">
           <h3 class="text-lg font-semibold"><%= course.coursename %></h3>
           <% if (title === 'My Courses') { %>
@@ -53,17 +53,19 @@
         <p class="text-gray-600">
           By 
           <% if (title === 'My Courses') { %>
-            <%= user.firstname %> <%= user.lastname %>
+            You
           <% } else { %>
             <%= course.User.firstname %> <%= course.User.lastname %>
           <% } %>
         </p>
 
-        <div class="flex items-center text-gray-700 my-2">
-          <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 2a6 6 0 00-6 6v3a4 4 0 00-2 3.464V16h16v-1.536A4 4 0 0016 11V8a6 6 0 00-6-6z"/>
-          </svg>
-          <%= course.enrollments %> Enrollments
+        <div class="flex items-center text-gray-700 my-2 gap-2">
+            <svg class="w-6 h-6 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3.78552 9.5 12.7855 14l9-4.5-9-4.5-8.99998 4.5Zm0 0V17m3-6v6.2222c0 .3483 2 1.7778 
+                5.99998 1.7778 4 0 6-1.3738 6-1.7778V11" />
+            </svg>
+          <%= enrollmentMap[course.id] || 0 %> Enrollments
         </div>
 
 

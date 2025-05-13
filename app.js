@@ -155,10 +155,26 @@ app.get("/Educator", ensureRole("educator"), async (req, res) => {
     },
   });
 
+  // Get enrollment counts for all courses
+  const enrollments = await UserCourses.findAll({
+    attributes: [
+      "courseId",
+      [Sequelize.fn("COUNT", Sequelize.col("userId")), "count"],
+    ],
+    group: ["courseId"],
+    raw: true,
+  });
+
+  const enrollmentMap = {};
+  enrollments.forEach((e) => {
+    enrollmentMap[e.courseId] = parseInt(e.count);
+  });
+
   res.render("educator", {
     title: "Educator Dashboard",
     user: req.session.user,
     courses,
+    enrollmentMap, // <- pass it
     messages: {
       error: req.flash("error"),
       success: req.flash("success"),
@@ -444,15 +460,37 @@ app.get("/chapters/:chapterId/pages", ensureLoggedIn, async (req, res) => {
 
 app.get("/my-courses", ensureLoggedIn, async (req, res) => {
   try {
+    const userId = req.session.user.id;
+
+    // Fetch all courses created by the educator
     const myCourses = await Course.findAll({
-      where: {
-        userId: req.session.user.id,
-      },
+      where: { userId },
     });
+
+    // Fetch enrollment counts for these courses
+    const enrollments = await UserCourses.findAll({
+      where: {
+        courseId: myCourses.map((course) => course.id),
+      },
+      attributes: [
+        "courseId",
+        [Sequelize.fn("COUNT", Sequelize.col("userId")), "count"],
+      ],
+      group: ["courseId"],
+      raw: true,
+    });
+
+    const enrollmentMap = {};
+    enrollments.forEach((e) => {
+      enrollmentMap[e.courseId] = parseInt(e.count);
+    });
+
+    // Render the view with enrollment counts
     res.render("courses", {
       title: "My Courses",
       courses: myCourses,
       user: req.session.user,
+      enrollmentMap, // <- pass this to view
       messages: {
         error: req.flash("error"),
         success: req.flash("success"),
@@ -1222,6 +1260,7 @@ app.get("/student/page/:id", ensureRole("student"), async (req, res) => {
         id: chapter.id,
         chaptername: chapter.chaptername,
         courseId: course.id,
+        coursename: course.coursename, // Add this line
       },
       prevPage,
       nextPage,

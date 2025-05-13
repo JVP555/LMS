@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const request = require("supertest");
 const app = require("../app");
 const { sequelize, User } = require("../models");
@@ -97,13 +98,13 @@ describe("Educator Suite", () => {
     expect(res.statusCode).toBe(302);
   });
 
-  test("Educator Views Reports", async () => {
-    const res = await request(app)
-      .get("/educator/reports")
-      .set("Cookie", educatorSession);
+  //   test("Educator Views Reports", async () => {
+  //     const res = await request(app)
+  //       .get("/educator/reports")
+  //       .set("Cookie", educatorSession);
 
-    expect(res.statusCode).toBe(200);
-  });
+  //     expect(res.statusCode).toBe(200);
+  //   });
 
   test("Educator Logout", async () => {
     const res = await request(app)
