@@ -17,16 +17,8 @@
   </div>
 
   <!-- Flash messages -->
-  <% if (messages.error.length > 0) { %>
-    <div class="bg-red-100 text-red-800 px-4 py-2 mb-4 rounded">
-      <%= messages.error[0] %>
-    </div>
-  <% } %>
-  <% if (messages.success.length > 0) { %>
-    <div class="bg-green-100 text-green-800 px-4 py-2 mb-4 rounded">
-      <%= messages.success[0] %>
-    </div>
-  <% } %>
+  <%- include('notifications', { messages: messages }) %>
+
 
   <!-- Enrolled Courses -->
   <h2 class="text-2xl font-bold mb-4 underline text-center">You have joined the following courses:</h2>
@@ -88,7 +80,7 @@
           </div>
         </div>
         <div class="flex gap-4">
-          <a href="/student/courses/<%= course.id %>/chapters" class="w-1/2 bg-cyan-400 hover:bg-cyan-500 text-black font-semibold px-4 py-3 rounded shadow text-center">
+          <a href="/student/courses/<%= course.id %>/chapters" class="w-1/2 bg-cyan-400 hover:bg-cyan-500 text-black font-semibold px-4 py- rounded shadow text-center">
             View course
           </a>
           <form action="/enroll/<%= course.id %>" method="POST" class="w-1/2">

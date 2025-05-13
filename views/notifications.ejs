@@ -1,17 +1,11 @@
 <!-- notifications.ejs -->
-<% if (messages.error && messages.error.length > 0) { %>
-    <div class="text-red-500 mb-4">
-      <% messages.error.forEach(function(msg) { %>
-        <p><%= msg %></p>
-      <% }) %>
+  <% if (messages.error.length > 0) { %>
+    <div class="bg-red-100 text-red-800 px-4 py-2 mb-4 rounded">
+      <%= messages.error[0] %>
     </div>
   <% } %>
-  
-  <% if (messages.success && messages.success.length > 0) { %>
-    <div class="text-green-500 mb-4">
-      <% messages.success.forEach(function(msg) { %>
-        <p><%= msg %></p>
-      <% }) %>
+  <% if (messages.success.length > 0) { %>
+    <div class="bg-green-100 text-green-800 px-4 py-2 mb-4 rounded">
+      <%= messages.success[0] %>
     </div>
   <% } %>
-  

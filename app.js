@@ -120,7 +120,15 @@ app.post("/userssignin", async (req, res) => {
       return res.redirect("/signin");
     }
 
-    req.session.user = user;
+    // ✅ Store plain user data in session
+    req.session.user = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    };
+
+    // ✅ Redirect based on role
     res.redirect(`/${user.role === "educator" ? "Educator" : "Student"}`);
   } catch (err) {
     console.error(err);
@@ -192,6 +200,7 @@ app.post("/changepassword/:userId", ensureLoggedIn, async (req, res) => {
       req.flash("error", "Current password is incorrect.");
       return res.redirect(`/changepassword/${userId}`);
     }
+
     const isNewSameAsCurrent = await bcrypt.compare(newPassword, user.password);
     if (isNewSameAsCurrent) {
       req.flash(
@@ -205,7 +214,11 @@ app.post("/changepassword/:userId", ensureLoggedIn, async (req, res) => {
     await user.update({ password: hashedNewPassword });
 
     req.flash("success", "Password changed successfully.");
-    res.redirect("/");
+
+    // ✅ Redirect based on user role
+    const redirectPath =
+      req.session.user.role === "educator" ? "/educator" : "/student";
+    return res.redirect(redirectPath);
   } catch (err) {
     console.error(err);
     req.flash("error", "An error occurred while changing password.");
