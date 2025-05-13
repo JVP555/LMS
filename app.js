@@ -10,6 +10,7 @@ const { User, Course, Chapter, Page, UserCourses } = require("./models");
 const { Op } = require("sequelize");
 const { title } = require("process");
 const chapter = require("./models/chapter");
+const Sequelize = require("sequelize");
 
 const app = express();
 
@@ -881,7 +882,6 @@ app.post("/pages/:pageId/delete", ensureRole("educator"), async (req, res) => {
 });
 
 //student
-const { Sequelize } = require("sequelize");
 
 app.get("/Student", ensureRole("student"), async (req, res) => {
   try {
@@ -952,18 +952,81 @@ app.post("/enroll/:courseId", ensureRole("student"), async (req, res) => {
     const existing = await UserCourses.findOne({ where: { userId, courseId } });
     if (existing) {
       req.flash("error", "Already enrolled in this course.");
-      return res.redirect("/Student");
+      return res.redirect(`/student/courses/${courseId}/chapters`);
     }
 
     await UserCourses.create({ userId, courseId });
     req.flash("success", "Successfully enrolled in the course.");
-    res.redirect("/Student");
+    res.redirect(`/student/courses/${courseId}/chapters`);
   } catch (err) {
     console.error("Enroll Error:", err);
     req.flash("error", "Enrollment failed.");
     res.redirect("/Student");
   }
 });
+
+app.get(
+  "/student/courses/:courseId/chapters",
+  ensureRole("student"),
+  async (req, res) => {
+    const courseId = req.params.courseId;
+    const userId = req.session.user.id;
+
+    try {
+      const course = await Course.findByPk(courseId, {
+        include: {
+          model: User,
+          attributes: ["firstname", "lastname"],
+        },
+      });
+
+      if (!course) {
+        req.flash("error", "Course not found.");
+        return res.redirect("/Student");
+      }
+
+      const chapters = await Chapter.findAll({
+        where: { courseId },
+      });
+      const allenrollments = await UserCourses.findAll({
+        attributes: [
+          "courseId",
+          [Sequelize.fn("COUNT", Sequelize.col("userId")), "count"],
+        ],
+        group: ["courseId"],
+        raw: true,
+      });
+
+      // Convert the result into a dictionary: { courseId: count }
+      const enrollmentMap = {};
+      allenrollments.forEach((e) => {
+        enrollmentMap[e.courseId] = parseInt(e.count);
+      });
+
+      // Fetch user's enrolled courses
+      const enrollments = await UserCourses.findAll({ where: { userId } });
+
+      const enrolledCourseIds = enrollments.map((e) => e.courseId);
+
+      res.render("student-chapter", {
+        title: "Course Chapters",
+        course,
+        chapters,
+        user: req.session.user,
+        enrolledCourseIds,
+        enrollmentMap, // ⬅️ required for template logic
+        messages: {
+          error: req.flash("error"),
+          success: req.flash("success"),
+        },
+      });
+    } catch (err) {
+      console.error("Failed to load chapters:", err);
+      req.flash("error", "Failed to load chapters.");
+      res.redirect("/Student");
+    }
+  }
+);
 
 // Logout
 app.get("/logout", (req, res) => {
