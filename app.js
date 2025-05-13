@@ -133,7 +133,8 @@ app.post("/userssignin", async (req, res) => {
 
     req.session.user = {
       id: user.id,
-      name: user.name,
+      firstname: user.firstname,
+      lastname: user.lastname,
       email: user.email,
       role: user.role,
     };
@@ -228,7 +229,6 @@ app.get("/Educator", ensureRole("educator"), async (req, res) => {
     },
   });
 
-  // Get enrollment counts for all courses
   const enrollments = await UserCourses.findAll({
     attributes: [
       "courseId",
@@ -245,9 +245,9 @@ app.get("/Educator", ensureRole("educator"), async (req, res) => {
 
   res.render("Educator/educator", {
     title: "Educator Dashboard",
-    user: req.session.user,
+    user: req.session.user, // already set during login
     courses,
-    enrollmentMap, // <- pass it
+    enrollmentMap,
     messages: {
       error: req.flash("error"),
       success: req.flash("success"),
@@ -398,17 +398,39 @@ app.get("/page/:pageId", ensureLoggedIn, async (req, res) => {
 // Mark Page Completed
 app.post("/markCompleted/:pageId", ensureRole("educator"), async (req, res) => {
   const pageId = req.params.pageId;
+  const userId = req.session.user.id;
+
   try {
-    const page = await Page.findByPk(pageId);
+    const page = await Page.findByPk(pageId, {
+      include: {
+        model: Chapter,
+        include: {
+          model: Course,
+        },
+      },
+    });
+
     if (!page) {
       req.flash("error", "Page not found.");
       return res.redirect("/");
     }
 
+    // ✅ Check if the logged-in user is the creator of the course
+    if (page.Chapter.Course.userId !== userId) {
+      req.flash("error", "You are not authorized to mark this page.");
+      return res.redirect(`/page/${pageId}`);
+    }
+
     page.completed = !page.completed;
     await page.save();
 
-    req.flash("success", "Page marked as completed.");
+    req.flash(
+      "success",
+      `Page marked as ${
+        page.completed ? "completed" : "not completed"
+      } successfully.`
+    );
+
     res.redirect(`/page/${pageId}`);
   } catch (err) {
     console.error(err);
@@ -419,6 +441,7 @@ app.post("/markCompleted/:pageId", ensureRole("educator"), async (req, res) => {
     res.redirect(`/page/${pageId}`);
   }
 });
+
 app.get("/courses/:courseId/chapters", ensureLoggedIn, async (req, res) => {
   const courseId = req.params.courseId;
   try {

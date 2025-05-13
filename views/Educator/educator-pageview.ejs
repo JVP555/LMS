@@ -72,16 +72,19 @@
       <div class="w-40"></div>
     <% } %>
 
-    <form action="/markCompleted/<%= page.id %>" method="POST" class="w-40 text-center">
-      <button type="submit"
-        class="w-full whitespace-nowrap font-medium px-3 py-2 rounded shadow h-full text-white
-        <%= page.completed
-          ? 'bg-green-500 hover:bg-green-600'
-          : 'bg-yellow-500 hover:bg-yellow-600' %>"
-        aria-label="<%= page.completed ? 'Page already completed' : 'Mark this page as completed' %>">
-        <%= page.completed ? 'Completed' : 'Mark as Completed' %>
-      </button>
-    </form>
+    <% if (user && user.id === page.Chapter.Course.userId) { %>
+      <form action="/markCompleted/<%= page.id %>" method="POST" class="w-40 text-center">
+        <button type="submit"
+          class="w-full whitespace-nowrap font-medium px-3 py-2 rounded shadow h-full text-white
+          <%= page.completed
+            ? 'bg-green-500 hover:bg-green-600'
+            : 'bg-yellow-500 hover:bg-yellow-600' %>"
+          aria-label="<%= page.completed ? 'Page already completed' : 'Mark this page as completed' %>">
+          <%= page.completed ? 'Completed' : 'Mark as Completed' %>
+        </button>
+      </form>
+    <% } %>
+
 
     <% if (nextPage) { %>
       <a href="/page/<%= nextPage.id %>" class="w-40">
