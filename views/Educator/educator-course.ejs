@@ -1,9 +1,10 @@
 
 <title><%= title %></title>
 
-<%- include('../General/header') %>
+
 
 <% if (title === 'My Courses') { %>
+  <%- include('../General/header') %>
   <header class="text-center my-6">
     <%- include('../General/notifications', { messages: messages }) %>
     <h1 class="text-3xl font-bold underline text-gray-800">My Courses</h1>
