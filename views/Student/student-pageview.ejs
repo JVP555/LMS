@@ -2,62 +2,82 @@
 <html lang="en">
 <head>
   <title><%= title %></title>
-  <style>
-    body { display: flex; flex-direction: column; height: 100vh; }
-    main { flex: 1; overflow-y: auto; padding-bottom: 120px; }
-    .fixed-buttons {
-      position: fixed; bottom: 0px; left: 0; width: 100%;
-      background-color: #ffffff; padding: .35rem 0;
-      box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
-      display: flex; justify-content: center; gap: 1rem;
-    }
-    header {
-      position: sticky; top: 0;
-      background-color: #ffffff; z-index: 10; padding: .5rem 0;
-    }
-  </style>
+  <!-- Tailwind CSS should be globally available -->
 </head>
-<body class="bg-gray-50 font-sans text-gray-800">
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen flex flex-col">
+  <!-- Header -->
   <%- include('../General/header') %>
-  <div class="mt-6">
 
-  <header class="text-center mt-8 mb-4 px-4">
-    <h1 class="text-4xl font-bold"><%= page.title %></h1>
+  <!-- Page Title -->
+  <header class="sticky top-0 bg-white z-10 py-4">
+    <h1 class="text-4xl font-bold text-center text-gray-800"><%= page.title %></h1>
   </header>
 
-  <main class="px-6">
-    <div class="max-w-3xl text-lg leading-relaxed text-center m-auto">
-      <p><%= page.content %></p>
+  <!-- Main Section -->
+  <main class="flex flex-col flex-grow px-6">
+    <!-- Page Content (grows and pushes footer if content is small) -->
+    <div class="flex-1 flex flex-col items-center justify-start">
+      <div class="max-w-3xl w-full text-lg leading-relaxed text-center text-gray-700">
+        <p><%= page.content %></p>
+      </div>
+    </div>
+
+    <!-- Mark as Completed Box (aligned to width of nav buttons area) -->
+    <div class="w-full flex justify-center">
+      <div class="w-[44rem] max-w-full flex justify-center">
+        <form action="/student/markCompleted/<%= page.id %>" method="POST" class="w-full">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button type="submit"
+              class="w-full px-6 py-2 rounded-md shadow-sm text-lg font-semibold transition duration-200
+                <%= page.completed
+                  ? 'text-gray-600 border border-gray-400 cursor-default'
+                  : 'border border-purple-400 text-purple-600 hover:bg-purple-100' %>">
+                <%= page.completed ? '✓✓ Completed' : '• Mark as Completed' %>
+            </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Navigation Buttons (fixed spacing regardless of visibility) -->
+    <div class="w-full bg-white shadow-inner mt-6 py-1 mb-1 flex justify-between items-center px-[calc((100%-44rem)/2)] max-[768px]:flex-col max-[768px]:gap-4">
+      <!-- Previous Page -->
+      <div class="w-44">
+        <% if (prevPage) { %>
+          <a href="/student/page/<%= prevPage.id %>">
+            <button class="w-full bg-gray-800 hover:bg-gray-700 text-white font-medium px-4 py-2 rounded-lg shadow-md flex items-center justify-center gap-2 transition duration-200">
+              <span class="text-xl">&larr;</span> Previous Page
+            </button>
+          </a>
+        <% } else { %>
+          <div class="w-full h-[42px]"></div> <!-- Spacer for alignment -->
+        <% } %>
+      </div>
+
+      <!-- Scroll to Top -->
+      <div class="w-44 flex justify-center">
+        <% if (page.content.length > 1000) { %>
+          <button onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+            class="w-full bg-gray-800 hover:bg-gray-700 text-white font-medium px-4 py-2 rounded-lg shadow-md transition duration-200">
+            Scroll to Top
+          </button>
+        <% } else { %>
+          <div class="w-full h-[42px]"></div> <!-- Spacer -->
+        <% } %>
+      </div>
+
+      <!-- Next Page -->
+      <div class="w-44">
+        <% if (nextPage) { %>
+          <a href="/student/page/<%= nextPage.id %>">
+            <button class="w-full bg-gray-800 hover:bg-gray-700 text-white font-medium px-4 py-2 rounded-lg shadow-md flex items-center justify-center gap-2 transition duration-200">
+              Next Page <span class="text-xl">&rarr;</span>
+            </button>
+          </a>
+        <% } else { %>
+          <div class="w-full h-[42px]"></div> <!-- Spacer -->
+        <% } %>
+      </div>
     </div>
   </main>
-
-  <div class="fixed-buttons">
-    <% if (prevPage) { %>
-      <a href="/student/page/<%= prevPage.id %>" class="w-40">
-        <button class="w-full bg-gray-300 hover:bg-gray-400 text-black font-medium px-4 py-2 rounded shadow h-full">
-          Previous Page
-        </button>
-      </a>
-    <% } else { %> <div class="w-40"></div> <% } %>
-
-    <form action="/student/markCompleted/<%= page.id %>" method="POST" class="w-40 text-center">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-
-      <button type="submit"
-        class="w-full whitespace-nowrap font-medium px-3 py-2 rounded shadow h-full text-white
-        <%= page.completed ? 'bg-green-500 hover:bg-green-600' : 'bg-yellow-500 hover:bg-yellow-600' %>"
-        aria-label="<%= page.completed ? 'Page already completed' : 'Mark this page as completed' %>">
-        <%= page.completed ? 'Completed' : 'Mark as Completed' %>
-      </button>
-    </form>
-
-    <% if (nextPage) { %>
-      <a href="/student/page/<%= nextPage.id %>" class="w-40">
-        <button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2 rounded shadow h-full">
-          Next Page
-        </button>
-      </a>
-    <% } else { %> <div class="w-40"></div> <% } %>
-  </div>
 </body>
 </html>
