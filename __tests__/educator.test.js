@@ -1,13 +1,21 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
 const request = require("supertest");
 const app = require("../app");
-const { sequelize, User } = require("../models");
+const {
+  sequelize,
+  User,
+  Course,
+  Chapter,
+  Page,
+  UserCourses,
+  PageCompletion,
+} = require("../models");
 
 let educatorSession, educatorId, courseId, chapterId, pageId;
 
 beforeAll(async () => {
   await sequelize.sync({ force: true });
-  jest.spyOn(console, "error").mockImplementation(() => {});
 });
 
 afterAll(async () => {
@@ -99,8 +107,14 @@ describe("Educator Suite", () => {
       });
 
     expect(res.statusCode).toBe(302);
-    const location = res.headers.location;
-    pageId = location.split("/").filter(Boolean).pop();
+
+    // ✅ Get the most recent page from DB instead
+    const latestPage = await Page.findOne({
+      where: { chapterId },
+      order: [["createdAt", "DESC"]],
+    });
+
+    pageId = latestPage.id;
     expect(pageId).toBeDefined();
   });
 

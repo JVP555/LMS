@@ -747,7 +747,14 @@ router.get("/pages/:pageId/edit", ensureRole("educator"), async (req, res) => {
 
 // Update Page Route (POST)
 router.post("/pages/:pageId/edit", ensureRole("educator"), async (req, res) => {
-  const pageId = req.params.pageId;
+  const rawPageId = req.params.pageId;
+  const pageId = parseInt(rawPageId, 10);
+
+  if (isNaN(pageId)) {
+    req.flash("error", "Invalid page ID.");
+    return res.redirect("/Educator");
+  }
+
   const { title, content } = req.body;
 
   try {
@@ -761,7 +768,6 @@ router.post("/pages/:pageId/edit", ensureRole("educator"), async (req, res) => {
     await page.update({ title, content });
 
     const chapterId = page.chapterId;
-
     req.flash("success", "Page updated successfully.");
     res.redirect(`/my-chapters/${chapterId}/my-pages`);
   } catch (err) {

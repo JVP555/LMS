@@ -19,31 +19,34 @@
       <hr class="my-5 border-t-2 border-gray-400">
       <h2 class="text-2xl font-bold underline text-black-700 mb-4">Chapters</h2>
 
-    <% if (chapters.length === 0) { %>
-    <p class="text-gray-600">No chapters found in this course.</p>
-    <% } else { %>
-    <div class="flex flex-col gap-3">
-        <% chapters.forEach(ch => { %>
-        <% if (enrolledCourseIds.includes(course.id)) { %>
-            <a href="/student/chapters/<%= ch.id %>/pages" class="no-underline block">
-            <div class="flex justify-between items-center border border-black px-4 py-3 my-2 shadow-sm hover:shadow-md transition bg-white">
-                <span class="text-md font-medium text-gray-800"><%= ch.chaptername %></span>
-            </div>
-            </a>
-        <% } else { %>
-            <div class="flex justify-between items-center border rounded-lg px-4 py-3 my-2 shadow-sm bg-white-100 cursor-not-allowed">
-            <span class="text-md font-medium text-black-800"><%= ch.chaptername %></span>
-            <svg class="w-6 h-6 text-black-700 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 14v3m-3-6V7a3 3 0 1 1 6 0v4m-8 0h10a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1Z"/>
-            </svg>
-            </div>
-        <% } %>
-        <% }) %>
-    </div>
-    <% } %>
-    </div>
+      <% if (chapters.length === 0) { %>
+        <p class="text-gray-600">No chapters found in this course.</p>
+      <% } else { %>
+        <div class="flex flex-col gap-3">
+          <% chapters.forEach(ch => { %>
+            <% if (enrolledCourseIds.includes(course.id)) { %>
+              <a href="/student/chapters/<%= ch.id %>/pages" class="no-underline block">
+                <div class="flex justify-between items-center border border-black px-4 py-3 my-2 shadow-sm hover:shadow-md transition bg-white">
+                  <span class="text-md font-medium text-gray-800"><%= ch.chaptername %></span>
+                  <% if (ch.completed) { %>
+                    <span class="text-green-800 border border-green-500 px-4 bg-green-100 rounded font-semibold">Completed</span>
+                  <% } %>
+                </div>
+              </a>
+            <% } else { %>
+              <div class="flex justify-between items-center border rounded-lg px-4 py-3 my-2 shadow-sm bg-white-100 cursor-not-allowed">
+                <span class="text-md font-medium text-black-800"><%= ch.chaptername %></span>
+                <svg class="w-6 h-6 text-black-700 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 14v3m-3-6V7a3 3 0 1 1 6 0v4m-8 0h10a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1Z"/>
+                </svg>
+              </div>
+            <% } %>
+          <% }) %>
+        </div>
+      <% } %>
+
 
 
     <!-- Right side: Course card (only show if not enrolled) -->

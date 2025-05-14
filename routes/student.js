@@ -99,11 +99,13 @@ router.get("/Student", ensureRole("student"), async (req, res) => {
 
     // Completion percentage per course
     const completionPercentage = {};
-    for (const courseId in totalPagesPerCourse) {
-      const total = totalPagesPerCourse[courseId];
+    user.enrolledCourses.forEach((course) => {
+      const courseId = course.id;
+      const total = totalPagesPerCourse[courseId] || 0;
       const completed = completedPagesPerCourse[courseId] || 0;
-      completionPercentage[courseId] = Math.round((completed / total) * 100);
-    }
+      completionPercentage[courseId] =
+        total === 0 ? 100 : Math.round((completed / total) * 100);
+    });
 
     // ✅ Render dashboard with progress info
     res.render("Student/student", {
@@ -159,6 +161,7 @@ router.get(
     const userId = req.session.user.id;
 
     try {
+      // Fetch course with educator
       const course = await Course.findByPk(courseId, {
         include: {
           model: User,
@@ -171,9 +174,47 @@ router.get(
         return res.redirect("/Student");
       }
 
-      const chapters = await Chapter.findAll({
-        where: { courseId },
+      // Fetch chapters for this course
+      const chapters = await Chapter.findAll({ where: { courseId } });
+
+      // Fetch all pages for those chapters
+      const chapterIds = chapters.map((ch) => ch.id);
+      const pages = await Page.findAll({
+        where: { chapterId: chapterIds },
+        raw: true,
       });
+
+      // Group pages by chapterId
+      const pagesByChapter = {};
+      pages.forEach((page) => {
+        if (!pagesByChapter[page.chapterId]) {
+          pagesByChapter[page.chapterId] = [];
+        }
+        pagesByChapter[page.chapterId].push(page.id);
+      });
+
+      // Fetch completed pages by user
+      const completions = await PageCompletion.findAll({
+        where: { userId },
+        raw: true,
+      });
+
+      const completedPageIds = new Set(completions.map((c) => c.pageId));
+
+      // Mark each chapter as completed if all its pages are completed, or no pages exist
+      const chaptersWithCompletion = chapters.map((chapter) => {
+        const pageIds = pagesByChapter[chapter.id] || [];
+        const allCompleted =
+          pageIds.length === 0 ||
+          pageIds.every((id) => completedPageIds.has(id));
+
+        return {
+          ...chapter.toJSON(),
+          completed: allCompleted,
+        };
+      });
+
+      // Enrollment counts
       const allenrollments = await UserCourses.findAll({
         attributes: [
           "courseId",
@@ -183,24 +224,22 @@ router.get(
         raw: true,
       });
 
-      // Convert the result into a dictionary: { courseId: count }
       const enrollmentMap = {};
       allenrollments.forEach((e) => {
         enrollmentMap[e.courseId] = parseInt(e.count);
       });
 
-      // Fetch user's enrolled courses
+      // User's enrolled course IDs
       const enrollments = await UserCourses.findAll({ where: { userId } });
-
       const enrolledCourseIds = enrollments.map((e) => e.courseId);
 
       res.render("Student/student-chapter", {
         title: "Course Chapters",
         course,
-        chapters,
+        chapters: chaptersWithCompletion,
         user: req.session.user,
         enrolledCourseIds,
-        enrollmentMap, // ⬅️ required for template logic
+        enrollmentMap,
         messages: {
           error: req.flash("error"),
           success: req.flash("success"),
@@ -247,10 +286,27 @@ router.get(
         return res.redirect("/Student");
       }
 
-      // Fetch pages of this chapter
+      // Fetch all pages of this chapter
       const pages = await Page.findAll({
         where: { chapterId },
         order: [["id", "ASC"]],
+      });
+
+      // Fetch all completed pages for this user
+      const completions = await PageCompletion.findAll({
+        where: {
+          userId,
+          pageId: pages.map((p) => p.id),
+        },
+      });
+
+      const completedPageIds = new Set(completions.map((c) => c.pageId));
+
+      // Annotate each page with completion status
+      const pagesWithCompletion = pages.map((page) => {
+        const plainPage = page.get({ plain: true }); // Same as toJSON()
+        plainPage.complete = completedPageIds.has(page.id);
+        return plainPage;
       });
 
       res.render("Student/student-page", {
@@ -262,7 +318,7 @@ router.get(
           courseId: chapter.courseId,
           coursename: chapter.Course?.coursename || "Course",
         },
-        pages,
+        pages: pagesWithCompletion,
         user: req.session.user,
       });
     } catch (err) {
@@ -366,4 +422,106 @@ router.post(
     }
   }
 );
+
+router.get("/student/viewreport", ensureRole("student"), async (req, res) => {
+  const userId = req.session.user.id;
+
+  try {
+    // Get student's enrolled courses
+    const enrollments = await User.findByPk(userId, {
+      include: {
+        model: Course,
+        as: "enrolledCourses",
+      },
+    });
+
+    const enrolledCourses = enrollments.enrolledCourses;
+
+    if (!enrolledCourses.length) {
+      return res.render("Student/student-viewreport", {
+        title: "Course Reports",
+        user: req.session.user,
+        reportData: [],
+      });
+    }
+
+    // Fetch chapters
+    const chapters = await Chapter.findAll({
+      where: {
+        courseId: enrolledCourses.map((c) => c.id),
+      },
+    });
+
+    const chapterCountMap = {};
+    chapters.forEach((ch) => {
+      chapterCountMap[ch.courseId] = (chapterCountMap[ch.courseId] || 0) + 1;
+    });
+
+    // Fetch all pages
+    const allPages = await Page.findAll({
+      include: {
+        model: Chapter,
+        attributes: ["courseId"],
+      },
+    });
+
+    const totalPagesPerCourse = {};
+    allPages.forEach((page) => {
+      const courseId = page.Chapter?.courseId;
+      if (courseId) {
+        totalPagesPerCourse[courseId] =
+          (totalPagesPerCourse[courseId] || 0) + 1;
+      }
+    });
+
+    // Fetch student's completed pages
+    const completions = await PageCompletion.findAll({
+      where: { userId },
+      include: {
+        model: Page,
+        include: {
+          model: Chapter,
+          attributes: ["courseId"],
+        },
+      },
+    });
+
+    const completedPagesPerCourse = {};
+    completions.forEach((comp) => {
+      const courseId = comp.Page?.Chapter?.courseId;
+      if (courseId) {
+        completedPagesPerCourse[courseId] =
+          (completedPagesPerCourse[courseId] || 0) + 1;
+      }
+    });
+
+    // Construct report data
+    const reportData = enrolledCourses.map((course) => {
+      const courseId = course.id;
+      const totalChapters = chapterCountMap[courseId] || 0;
+      const totalPages = totalPagesPerCourse[courseId] || 0;
+      const completedPages = completedPagesPerCourse[courseId] || 0;
+      const percentage =
+        totalPages > 0 ? Math.round((completedPages / totalPages) * 100) : 0;
+
+      return {
+        course,
+        totalChapters,
+        totalPages,
+        percentage,
+      };
+    });
+
+    res.render("Student/student-viewreport", {
+      title: "Course Reports",
+      user: req.session.user,
+      reportData,
+    });
+  } catch (err) {
+    console.error("Error generating student report:", err);
+    req.flash("error", "Unable to load report.");
+    res.redirect("/Student");
+  }
+});
+
 module.exports = router;
