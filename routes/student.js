@@ -114,6 +114,7 @@ router.get("/Student", ensureRole("student"), async (req, res) => {
       user: req.session.user,
       enrolledCourses: user.enrolledCourses,
       showDashboardFeatures: true,
+      showDashboardFeaturesstudent: true,
       breadcrumb: [{ label: "Dashboard" }],
       enrolledCourseIds,
       allCourses,
@@ -248,6 +249,7 @@ router.get(
           success: req.flash("success"),
         },
         showDashboardFeatures: false,
+        showDashboardFeaturesstudent: false,
         breadcrumb: [
           { label: "Dashboard", href: "/Student" },
           { label: course.coursename },
@@ -333,6 +335,7 @@ router.get(
           success: req.flash("success"),
         },
         showDashboardFeatures: false,
+        showDashboardFeaturesstudent: false,
         breadcrumb: [
           { label: "Dashboard", href: "/Student" },
           {
@@ -417,6 +420,7 @@ router.get("/student/page/:id", ensureRole("student"), async (req, res) => {
         success: req.flash("success"),
       },
       showDashboardFeatures: false,
+      showDashboardFeaturesstudent: false,
       breadcrumb: [
         { label: "Dashboard", href: "/Student" },
         {
@@ -555,6 +559,7 @@ router.get("/student/viewreport", ensureRole("student"), async (req, res) => {
       user: req.session.user,
       reportData,
       showDashboardFeatures: false,
+      showDashboardFeaturesstudent: false,
       breadcrumb: [
         { label: "Dashboard", href: "/Student" },
         { label: "Reports" },

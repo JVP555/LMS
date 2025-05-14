@@ -1,97 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title %></title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    const maxCharacters = 100000;
+
+    function updateCharCount() {
+      const content = document.getElementById("content");
+      const charCount = document.getElementById("charCount");
+      const currentLength = content.value.length;
+
+      charCount.textContent = `${currentLength} / ${maxCharacters} characters`;
+
+      if (currentLength > maxCharacters) {
+        content.setCustomValidity("Content exceeds the maximum allowed characters.");
+        charCount.classList.remove("text-gray-500");
+        charCount.classList.add("text-red-500");
+      } else {
+        content.setCustomValidity("");
+        charCount.classList.add("text-gray-500");
+        charCount.classList.remove("text-red-500");
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", updateCharCount);
+  </script>
+  <style>
+    .fixed-bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: white;
+      box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      z-index: 20;
+    }
+
+    body {
+      padding-bottom: 100px; /* Prevent content from being hidden by fixed bar */
+    }
+  </style>
 </head>
 <body class="bg-gray-100 font-sans">
+  <%- include('../General/header') %>
   <%- include('../General/notifications', { messages: messages }) %>
-<% let formAction = ''; %>
 
+<% let formAction = ''; %>
 <% if (title === 'Create New Page') { %>
   <% formAction = '/my-chapter/' + chapterId + '/my-pages'; %>
-  <div class="mt-3 px-6">
-    <nav class="text-l mb-2">
-      <a href="/Educator" class="underline text-blue-600 ml-5">Dashboard</a> &gt;
-      <a href="/my-chapters/<%= chapter.Course.id %>" class="underline text-blue-600"><%= chapter.Course.coursename %></a> &gt;
-      <a href="/my-chapters/<%= chapter.id %>/my-pages" class="underline text-blue-600"><%= chapter.chaptername %></a> &gt;
-      <span class="text-black-600">Create New Page</span>
-    </nav>
-    <hr class="mb-6 border-t-2 border-gray-300">
-  </div>
 <% } else if (title === 'Edit Page') { %>
   <% formAction = '/pages/' + page.id + '/edit'; %>
-  <div class="mt-3 px-6">
-    <nav class="text-l mb-2">
-      <a href="/Educator" class="underline text-blue-600 ml-5">Dashboard</a> &gt;
-      <a href="/my-chapters/<%= chapter.Course.id %>" class="underline text-blue-600"><%= chapter.Course.coursename %></a> &gt;
-      <a href="/my-chapters/<%= chapter.id %>/my-pages" class="underline text-blue-600"><%= chapter.chaptername %></a> &gt;
-      <span class="text-black-600">Edit Page</span>
-    </nav>
-    <hr class="mb-6 border-t-2 border-gray-300">
-  </div>
 <% } %>
 
+<div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg mt-12">
+  <!-- Page Title -->
+  <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center"><%= title %></h1>
 
-  <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg mt-12">
+  <!-- Subheading -->
+  <h2 class="text-xl font-semibold text-gray-700 mb-6 text-center">
+    <%= title === 'Edit Page' ? 'Update Page Details' : 'Create a New Page' %>
+  </h2>
+
+  <!-- Form -->
+  <form id="mainForm" method="POST" action="<%= formAction %>">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
     <!-- Page Title -->
-    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center"><%= title %></h1>
-
-    <!-- Subheading -->
-    <h2 class="text-xl font-semibold text-gray-700 mb-6 text-center">
-      <%= title === 'Edit Page' ? 'Update Page Details' : 'Create a New Page' %>
-    </h2>
-
-
-
-    <!-- Form -->
-    <form method="POST" action="<%= formAction %>">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-
-      <!-- Page Title -->
-      <div class="mb-4">
-        <label for="title" class="block text-lg font-medium text-gray-700 mb-2">Page Title:</label>
-        <input 
-          type="text" 
-          id="title" 
-          name="title" 
-          value="<%=page.title || '' %>"
-          required
-          class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-        >
-      </div>
-
-      <!-- Page Content -->
-      <div class="mb-6">
-        <label for="content" class="block text-lg font-medium text-gray-700 mb-2">Content:</label>
-        <textarea 
-          id="content" 
-          name="content" 
-          rows="6"
-          class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-        ><%= page.content || '' %></textarea>
-      </div>
-
-      <!-- Submit -->
-      <div class="flex justify-center">
-        <button 
-          type="submit" 
-          class="w-full sm:w-auto bg-indigo-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
-        >
-          <%= title.includes('Edit') ? 'Update' : 'Create' %> Page
-        </button>
-      </div>
-    </form>
-
-    <!-- Go Back -->
-    <div class="mt-6 text-center">
-      <button onclick="window.history.back()" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition">
-        Go Back
-      </button>
+    <div class="mb-4">
+      <label for="title" class="block text-lg font-medium text-gray-700 mb-2">Page Title:</label>
+      <input 
+        type="text" 
+        id="title" 
+        name="title" 
+        value="<%= page.title || '' %>"
+        required
+        class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+      >
     </div>
-  </div>
 
+    <!-- Page Content -->
+    <div class="mb-2">
+      <label for="content" class="block text-lg font-medium text-gray-700 mb-2">Content:</label>
+      <textarea 
+        id="content" 
+        name="content" 
+        rows="10"
+        maxlength="1800000"
+        oninput="updateCharCount()"
+        class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+      ><%= page.content || '' %></textarea>
+    </div>
+  </form>
+</div>
+
+<!-- Fixed bottom bar with character counter and submit button -->
+<div class="fixed-bottom-bar">
+  <div id="charCount" class="text-sm text-gray-500 self-center">0 / 100000 characters</div>
+  <button 
+    type="submit"
+    form="mainForm"
+    onclick="document.querySelector('form').reportValidity()" 
+    class="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+  >
+    <%= title.includes('Edit') ? 'Update' : 'Create' %> Page
+  </button>
+</div>
 </body>
 </html>

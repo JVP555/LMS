@@ -58,13 +58,12 @@
           </svg>
         </button>
       </div>
-      <button onclick="window.location.href='/student/viewreport'" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-1 rounded shadow-md transition duration-200">View Course Reports</button>
-      <!-- Change Password -->
+      <% if (showDashboardFeaturesstudent) { %>  
+        <button onclick="window.location.href='/student/viewreport'" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-1 rounded shadow-md transition duration-200">View Course Reports</button>
+        <!-- Change Password -->
+      <% } %>
       <button onclick="window.location.href='/changepassword/<%= user.id %>'" class="bg-amber-500 hover:bg-amber-600 text-black px-4 py-1 rounded shadow-md transition duration-200">Change Password</button>
     <% } %>
-
-
-
     <!-- Sign Out -->
     <button onclick="window.location.href='/logout'" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-1 rounded shadow-md transition duration-200">Sign Out</button>
   </div>

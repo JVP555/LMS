@@ -47,15 +47,24 @@ router.get("/Educator", ensureRole("educator"), async (req, res) => {
       error: req.flash("error"),
       success: req.flash("success"),
     },
+    showDashboardFeaturesstudent: false,
+    showDashboardFeatures: true,
+    breadcrumb: [{ label: "Dashboard" }],
   });
 });
 
 // Course Creation
 router.get("/courses/new", ensureRole("educator"), (req, res) => {
   res.render("Educator/create-course", {
-    title: "Create Course",
+    title: "Create New Course",
     user: req.session.user,
     messages: { error: req.flash("error"), success: req.flash("success") },
+    showDashboardFeaturesstudent: false,
+    showDashboardFeatures: false,
+    breadcrumb: [
+      { label: "Dashboard", href: "/Educator" },
+      { label: "Edit Course" },
+    ],
   });
 });
 
@@ -116,6 +125,20 @@ router.get("/page/:pageId", ensureLoggedIn, async (req, res) => {
         error: req.flash("error"),
         success: req.flash("success"),
       },
+      showDashboardFeaturesstudent: false,
+      showDashboardFeatures: false,
+      breadcrumb: [
+        { label: "Dashboard", href: "/Educator" },
+        {
+          label: page.Chapter.Course.coursename,
+          href: `/courses/${page.Chapter.Course.id}`,
+        },
+        {
+          label: page.Chapter.chaptername,
+          href: `/chapters/${page.Chapter.id}/pages`,
+        },
+        { label: page.title },
+      ],
     });
   } catch (err) {
     console.error(err);
@@ -164,6 +187,20 @@ router.get("/my-page/:pageId", ensureLoggedIn, async (req, res) => {
         error: req.flash("error"),
         success: req.flash("success"),
       },
+      showDashboardFeaturesstudent: false,
+      showDashboardFeatures: false,
+      breadcrumb: [
+        { label: "Dashboard", href: "/Educator" },
+        {
+          label: page.Chapter.Course.coursename,
+          href: `/my-chapters/${page.Chapter.courseId}`,
+        },
+        {
+          label: page.Chapter.chaptername,
+          href: `/my-chapters/${page.Chapter.id}/my-pages`,
+        },
+        { label: page.title },
+      ],
     });
   } catch (err) {
     console.error(err);
@@ -231,6 +268,12 @@ router.get("/courses/:courseId/chapters", ensureLoggedIn, async (req, res) => {
       course,
       chapters,
       user: req.session.user,
+      showDashboardFeaturesstudent: false,
+      showDashboardFeatures: false,
+      breadcrumb: [
+        { label: "Dashboard", href: "/Educator" },
+        { label: course.coursename },
+      ],
     });
   } catch (err) {
     console.error(err);
@@ -259,6 +302,16 @@ router.get("/chapters/:chapterId/pages", ensureLoggedIn, async (req, res) => {
       chapter,
       pages,
       user: req.session.user,
+      showDashboardFeaturesstudent: false,
+      showDashboardFeatures: false,
+      breadcrumb: [
+        { label: "Dashboard", href: "/Educator" },
+        {
+          label: chapter.Course.coursename,
+          href: `/courses/${chapter.Course.id}/chapters`,
+        },
+        { label: chapter.chaptername },
+      ],
     });
   } catch (err) {
     console.error(err);
@@ -304,6 +357,12 @@ router.get("/my-courses", ensureLoggedIn, async (req, res) => {
         error: req.flash("error"),
         success: req.flash("success"),
       },
+      showDashboardFeaturesstudent: false,
+      showDashboardFeatures: true,
+      breadcrumb: [
+        { label: "Dashboard", href: "/Educator" },
+        { label: "My Courses" },
+      ],
     });
   } catch (error) {
     console.error(error);
@@ -336,6 +395,12 @@ router.get(
           error: req.flash("error"),
           success: req.flash("success"),
         },
+        showDashboardFeaturesstudent: false,
+        showDashboardFeatures: false,
+        breadcrumb: [
+          { label: "Dashboard", href: "/Educator" },
+          { label: "Edit Course" },
+        ],
       });
     } catch (err) {
       console.error(err);
@@ -425,6 +490,12 @@ router.get(
           error: req.flash("error"),
           success: req.flash("success"),
         },
+        showDashboardFeaturesstudent: false,
+        showDashboardFeatures: false,
+        breadcrumb: [
+          { label: "Dashboard", href: "/Educator" },
+          { label: course.coursename },
+        ],
       });
     } catch (err) {
       console.error(err);
@@ -460,6 +531,13 @@ router.get(
           error: req.flash("error"),
           success: req.flash("success"),
         },
+        showDashboardFeaturesstudent: false,
+        showDashboardFeatures: false,
+        breadcrumb: [
+          { label: "Dashboard", href: "/Educator" },
+          { label: course.coursename, href: `/my-chapters/${course.id}` },
+          { label: "Create New Chapter" },
+        ],
       });
     } catch (err) {
       console.error(err);
@@ -528,6 +606,16 @@ router.get(
           error: req.flash("error"),
           success: req.flash("success"),
         },
+        showDashboardFeaturesstudent: false,
+        showDashboardFeatures: false,
+        breadcrumb: [
+          { label: "Dashboard", href: "/Educator" },
+          {
+            label: chapter.Course.coursename,
+            href: `/my-chapters/${chapter.Course.id}`,
+          },
+          { label: "Edit Chapter" },
+        ],
       });
     } catch (err) {
       console.error(err);
@@ -631,6 +719,16 @@ router.get(
           error: req.flash("error"),
           success: req.flash("success"),
         },
+        showDashboardFeaturesstudent: false,
+        showDashboardFeatures: false,
+        breadcrumb: [
+          { label: "Dashboard", href: "/Educator" },
+          {
+            label: chapter.Course.coursename,
+            href: `/my-chapters/${chapter.courseId}`,
+          },
+          { label: chapter.chaptername },
+        ],
       });
     } catch (err) {
       console.error(err);
@@ -668,6 +766,20 @@ router.get(
           error: req.flash("error"),
           success: req.flash("success"),
         },
+        showDashboardFeaturesstudent: false,
+        showDashboardFeatures: false,
+        breadcrumb: [
+          { label: "Dashboard", href: "/Educator" },
+          {
+            label: chapter.Course.coursename,
+            href: `/my-chapters/${chapter.Course.id}`,
+          },
+          {
+            label: chapter.chaptername,
+            href: `/my-chapters/${chapter.id}/my-pages`,
+          },
+          { label: "Create New Page" },
+        ],
       });
     } catch (err) {
       console.error(err);
@@ -737,6 +849,20 @@ router.get("/pages/:pageId/edit", ensureRole("educator"), async (req, res) => {
         error: req.flash("error"),
         success: req.flash("success"),
       },
+      showDashboardFeaturesstudent: false,
+      showDashboardFeatures: false,
+      breadcrumb: [
+        { label: "Dashboard", href: "/Educator" },
+        {
+          label: page.Chapter.Course.coursename,
+          href: `/my-chapters/${page.Chapter.Course.id}`,
+        },
+        {
+          label: page.Chapter.chaptername,
+          href: `/my-chapters/${page.Chapter.id}/my-pages`,
+        },
+        { label: "Edit Page" },
+      ],
     });
   } catch (err) {
     console.error(err);
@@ -868,6 +994,12 @@ router.get("/educator/viewreport", ensureRole("educator"), async (req, res) => {
         error: req.flash("error"),
         success: req.flash("success"),
       },
+      showDashboardFeaturesstudent: false,
+      showDashboardFeatures: false,
+      breadcrumb: [
+        { label: "Dashboard", href: "/Educator" },
+        { label: "Reports" },
+      ],
     });
   } catch (err) {
     console.error(err);

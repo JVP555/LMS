@@ -1,36 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
-  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans">
+  <%- include('../General/header') %>
   <%- include('../General/notifications', { messages: messages }) %>
     <!-- Determine Form Action -->
 <% let formAction = ''; %>
 
 <% if (title === 'Create New Chapter') { %>
   <% formAction = '/my-courses/' + courseId + '/my-chapters'; %>
-  <div class="mt-3 px-6">
-    <nav class="text-l mb-2">
-      <a href="/Educator" class="underline text-blue-600 ml-5">Dashboard</a> &gt;
-      <a href="/my-chapters/<%= course.id %>" class="underline text-blue-600"><%= course.coursename %></a> &gt;
-      <span class="text-black-600">Create New Chapter</span>
-    </nav>
-    <hr class="mb-6 border-t-2 border-gray-300">
-  </div>
+
 <% } else if (title === 'Edit Chapter') { %>
   <% formAction = '/chapters/' + chapter.id; %>
-  <div class="mt-3 px-6">
-    <nav class="text-l mb-2">
-      <a href="/Educator" class="underline text-blue-600 ml-5">Dashboard</a> &gt;
-      <a href="/my-chapters/<%= course.id %>" class="underline text-blue-600"><%= course.coursename %></a> &gt;
-      <span class="text-black-600">Edit Chapter</span>
-    </nav>
-    <hr class="mb-6 border-t-2 border-gray-300">
-  </div>
 <% } %>
 
   <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg mt-12">
@@ -85,13 +68,6 @@
         </button>
       </div>
     </form>
-
-    <!-- Go Back -->
-    <div class="mt-6 text-center">
-      <button onclick="window.history.back()" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition">
-        Go Back
-      </button>
-    </div>
   </div>
 
 </body>

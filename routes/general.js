@@ -121,6 +121,7 @@ router.get("/changepassword/:userId", ensureLoggedIn, async (req, res) => {
       error: req.flash("error"),
       success: req.flash("success"),
     },
+    showDashboardFeaturesstudent: false,
     showDashboardFeatures: false,
     breadcrumb: [
       { label: "Dashboard", href: "/" },

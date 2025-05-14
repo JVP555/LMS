@@ -19,8 +19,8 @@ const app = express();
 
 // Middleware
 app.use(express.static(path.join(__dirname, "public")));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: "2mb" }));
+app.use(bodyParser.urlencoded({ extended: true, limit: "2mb" }));
 app.use(cookieParser());
 
 // Session configuration
@@ -40,6 +40,7 @@ app.use(flash());
 // View Engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+// Increase limits
 
 const csrfProtection = csrf({ cookie: true });
 
