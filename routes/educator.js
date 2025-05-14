@@ -239,7 +239,6 @@ router.get("/courses/:courseId/chapters", ensureLoggedIn, async (req, res) => {
   }
 });
 
-// Already present in your code:
 router.get("/chapters/:chapterId/pages", ensureLoggedIn, async (req, res) => {
   const chapterId = req.params.chapterId;
   try {
@@ -856,7 +855,7 @@ router.get("/educator/viewreport", ensureRole("educator"), async (req, res) => {
     });
 
     res.render("Educator/educator-viewreport", {
-      title: "Enrollment Report",
+      title: "Course Enrollment Report",
       user: req.session.user,
       reportData,
       messages: {
@@ -870,4 +869,5 @@ router.get("/educator/viewreport", ensureRole("educator"), async (req, res) => {
     res.redirect("/Educator");
   }
 });
+
 module.exports = router;

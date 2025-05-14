@@ -7,6 +7,7 @@ let educatorSession, educatorId, courseId, chapterId, pageId;
 
 beforeAll(async () => {
   await sequelize.sync({ force: true });
+  jest.spyOn(console, "error").mockImplementation(() => {});
 });
 
 afterAll(async () => {
@@ -66,9 +67,18 @@ describe("Educator Suite", () => {
     expect(courseId).toBeDefined();
   });
 
+  test("Educator Edits Course", async () => {
+    const res = await request(app)
+      .post(`/courses/${courseId}`)
+      .set("Cookie", educatorSession)
+      .send({ coursename: "Physics 101 - Updated" });
+
+    expect(res.statusCode).toBe(302);
+  });
+
   test("Educator Adds Chapter", async () => {
     const res = await request(app)
-      .post(`/newchapter/${courseId}`)
+      .post(`/my-courses/${courseId}/my-chapters`)
       .set("Cookie", educatorSession)
       .send({ chaptername: "Kinematics", description: "Basics of motion" });
 
@@ -80,9 +90,13 @@ describe("Educator Suite", () => {
 
   test("Educator Adds Page", async () => {
     const res = await request(app)
-      .post(`/newpage/${chapterId}`)
+      .post(`/my-chapter/${chapterId}/my-pages`)
       .set("Cookie", educatorSession)
-      .send({ title: "Displacement vs Distance", content: "Motion details" });
+      .send({
+        title: "Displacement vs Distance",
+        content: "Motion details",
+        chapterId: chapterId,
+      });
 
     expect(res.statusCode).toBe(302);
     const location = res.headers.location;
@@ -108,13 +122,37 @@ describe("Educator Suite", () => {
     expect(res.statusCode).toBe(302);
   });
 
+  test("Educator Deletes Page", async () => {
+    const res = await request(app)
+      .post(`/pages/${pageId}/delete`)
+      .set("Cookie", educatorSession);
+
+    expect(res.statusCode).toBe(302);
+  });
+
+  test("Educator Deletes Chapter", async () => {
+    const res = await request(app)
+      .post(`/chapters/${chapterId}/delete`)
+      .set("Cookie", educatorSession);
+
+    expect(res.statusCode).toBe(302);
+  });
+
+  test("Educator Deletes Course", async () => {
+    const res = await request(app)
+      .post(`/courses/${courseId}/delete`)
+      .set("Cookie", educatorSession);
+
+    expect(res.statusCode).toBe(302);
+  });
+
   test("Educator Views Reports", async () => {
     const res = await request(app)
-      .get("/educator/reports")
+      .get("/educator/viewreport")
       .set("Cookie", educatorSession);
 
     expect(res.statusCode).toBe(200);
-    expect(res.text).toContain("Report"); // Make sure your EJS view includes something like "Report"
+    expect(res.text).toContain("Course Enrollment Report"); // Make sure your EJS view includes something like "Report"
   });
 
   test("Educator Logout", async () => {
