@@ -1,31 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Educator | Course Enrollment Reports</title>
-  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<style>
-    footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: #f3f4f6;
-      padding: .35rem 0;
-      text-align: center;
-      box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
-    }
-</style>
 <body class="bg-gray-50 text-gray-900 font-sans">
-  <div class="mt-6">
-    <nav class="text-l mb-2">
-      <a href="/student" class="underline text-blue-600 ml-5">Dashboard</a> &gt;
-      <span class="text-black-600">Reports</span>
-    </nav>
-  </div>
-
+    <%- include('../General/header') %>
   <div class="p-6 max-w-5xl mx-auto">
     <h1 class="text-3xl font-bold mb-6">Course Enrollment Reports</h1>
 
@@ -73,9 +52,4 @@
   </div>
 
 </body>
-  <footer class="mt-auto p-4 flex justify-center items-center gap-4 text-sm text-gray-500">
-      <button onclick="history.back()" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition">
-        Go Back
-      </button>
-  </footer>
 </html>

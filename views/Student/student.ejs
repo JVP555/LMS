@@ -1,22 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
   <title><%= title %></title>
-  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-white p-8 font-sans">
-
-  <!-- Header -->
-  <div class="flex justify-between items-center mb-8">
-    <h1 class="text-4xl font-bold">Welcome <%= user.firstname %> <%= user.lastname %>!</h1>
-    <div class="space-x-2">
-      <button onclick="window.location.href='/logout'" class="bg-red-600 text-white px-4 py-1 rounded shadow hover:bg-red-700">Sign Out</button>
-      <button onclick="window.location.href='/changepassword/<%= user.id %>'" class="bg-yellow-500 text-white px-4 py-1 rounded shadow hover:bg-yellow-600">Change Password</button>
-    </div>
-  </div>
+  <%- include('../General/header') %>
 
   <!-- Flash messages -->
+
   <%- include('../General/notifications', { messages: messages }) %>
 
 
@@ -26,9 +17,6 @@
   <% if (enrolledCourses.length === 0) { %>
     <p class="mb-6">No courses enrolled yet.</p>
   <% } else { %>
-    <button onclick="window.location.href='/student/viewreport'" class=" my-3 bg-cyan-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition">
-      View Course Reports
-    </button>
     <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
       <% enrolledCourses.forEach(course => { %>
         <div class="border-2 border-black rounded p-4 shadow-md flex flex-col justify-between">

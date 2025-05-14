@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 const express = require("express");
 const Sequelize = require("sequelize");
@@ -112,6 +113,8 @@ router.get("/Student", ensureRole("student"), async (req, res) => {
       title: "Student Dashboard",
       user: req.session.user,
       enrolledCourses: user.enrolledCourses,
+      showDashboardFeatures: true,
+      breadcrumb: [{ label: "Dashboard" }],
       enrolledCourseIds,
       allCourses,
       enrollmentMap,
@@ -244,6 +247,11 @@ router.get(
           error: req.flash("error"),
           success: req.flash("success"),
         },
+        showDashboardFeatures: false,
+        breadcrumb: [
+          { label: "Dashboard", href: "/Student" },
+          { label: course.coursename },
+        ],
       });
     } catch (err) {
       console.error("Failed to load chapters:", err);
@@ -320,6 +328,19 @@ router.get(
         },
         pages: pagesWithCompletion,
         user: req.session.user,
+        messages: {
+          error: req.flash("error"),
+          success: req.flash("success"),
+        },
+        showDashboardFeatures: false,
+        breadcrumb: [
+          { label: "Dashboard", href: "/Student" },
+          {
+            label: chapter.Course?.coursename,
+            href: `/student/courses/${chapter.courseId}/chapters`,
+          },
+          { label: chapter.chaptername },
+        ],
       });
     } catch (err) {
       console.error("Failed to load chapter pages:", err);
@@ -386,11 +407,28 @@ router.get("/student/page/:id", ensureRole("student"), async (req, res) => {
         id: chapter.id,
         chaptername: chapter.chaptername,
         courseId: course.id,
-        coursename: course.coursename, // Add this line
+        coursename: course.coursename,
       },
       prevPage,
       nextPage,
       user: req.session.user,
+      messages: {
+        error: req.flash("error"),
+        success: req.flash("success"),
+      },
+      showDashboardFeatures: false,
+      breadcrumb: [
+        { label: "Dashboard", href: "/Student" },
+        {
+          label: course.coursename,
+          href: `/student/courses/${course.id}/chapters`,
+        },
+        {
+          label: chapter.chaptername,
+          href: `/student/chapters/${chapter.id}/pages`,
+        },
+        { label: page.title },
+      ],
     });
   } catch (err) {
     console.error("Page load error:", err);
@@ -516,6 +554,11 @@ router.get("/student/viewreport", ensureRole("student"), async (req, res) => {
       title: "Course Reports",
       user: req.session.user,
       reportData,
+      showDashboardFeatures: false,
+      breadcrumb: [
+        { label: "Dashboard", href: "/Student" },
+        { label: "Reports" },
+      ],
     });
   } catch (err) {
     console.error("Error generating student report:", err);

@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.tailwindcss.com"></script>
   <title><%= title %></title>
   <style>
     body { display: flex; flex-direction: column; height: 100vh; }
@@ -21,19 +18,9 @@
   </style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800">
-
+  <%- include('../General/header') %>
   <div class="mt-6">
-    <nav class="text-l mb-2">
-      <a href="/student" class="underline text-blue-600 ml-5">Dashboard</a> &gt;
-      <a href="/student/courses/<%= ch.courseId %>/chapters" class="underline text-blue-600">
-        <%= ch.coursename || "Course" %>
-      </a> &gt;
-      <a href="/student/chapters/<%= ch.id %>/pages" class="underline text-blue-600">
-        <%= ch.chaptername || "Chapter" %>
-      </a> &gt;
-      <span class="text-black-600"><%= page.title %></span>
-    </nav>
-  </div>
+
   <header class="text-center mt-8 mb-4 px-4">
     <h1 class="text-4xl font-bold"><%= page.title %></h1>
   </header>
