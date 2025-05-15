@@ -3,6 +3,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
+const SequelizeStore = require("connect-session-sequelize")(session.Store);
 const flash = require("connect-flash");
 const bcrypt = require("bcrypt");
 const path = require("path");
@@ -15,6 +16,8 @@ const {
   ensureStudent,
 } = require("./middleware");
 
+const { sequelize } = require("./models"); // Make sure this exports your Sequelize instance
+
 const app = express();
 
 // Middleware
@@ -23,25 +26,27 @@ app.use(bodyParser.json({ limit: "2mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "2mb" }));
 app.use(cookieParser());
 
-// Session configuration
+// Session configuration using SequelizeStore
+const sessionStore = new SequelizeStore({
+  db: sequelize,
+});
+
 app.use(
   session({
     secret: "your-secret-key",
+    store: sessionStore,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: { maxAge: 24 * 60 * 60 * 1000 }, // 1 day
   })
 );
 
+// Sync the session table
+sessionStore.sync();
+
 app.use(flash());
 
 // CSRF protection
-
-// View Engine
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-// Increase limits
-
 const csrfProtection = csrf({ cookie: true });
 
 if (process.env.NODE_ENV !== "test") {
@@ -62,6 +67,10 @@ if (process.env.NODE_ENV !== "test") {
     next();
   });
 }
+
+// View Engine
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 // Route handlers
 const generalRoutes = require("./routes/general");
