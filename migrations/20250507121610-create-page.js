@@ -28,7 +28,7 @@ module.exports = {
         onDelete: "CASCADE", // Optional: Automatically delete pages when the associated chapter is deleted
       },
       completed: {
-        type: sequelize.BOOLEAN,
+        type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
       },
