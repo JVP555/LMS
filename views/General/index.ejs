@@ -6,13 +6,20 @@
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-center py-20">
-  <div class="max-w-screen-lg mx-auto">
-    <h1 class="text-4xl font-bold text-green-700 mb-6">WELCOME</h1>
-    <h1 class="text-4xl font-bold text-blue-700 mb-6">LEARNING MANAGEMENT SYSTEM</h1>
-    <div class="mt-8">
-      <a href="/signup" class="text-white bg-blue-600 px-4 py-2 rounded hover:bg-blue-700" aria-label="Sign up for the Learning Management System">Sign Up</a>
-      <a href="/signin" class="ml-4 text-white bg-gray-600 px-4 py-2 rounded hover:bg-gray-700" aria-label="Sign in to the Learning Management System">Sign In</a>
+<body class="bg-gradient-to-br from-blue-50 via-white to-green-100 min-h-screen flex items-center justify-center">
+  <div class="max-w-4xl w-full text-center px-6 py-16 bg-white shadow-2xl rounded-2xl">
+    <h1 class="text-5xl md:text-6xl font-extrabold text-green-700 mb-4 drop-shadow">Welcome</h1>
+    <h2 class="text-3xl md:text-4xl font-semibold text-blue-800 mb-10 tracking-wide">Learning Management System</h2>
+    <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+      Manage your courses, track your learning progress, and explore new knowledge with our powerful LMS platform.
+    </p>
+    <div class="flex flex-col sm:flex-row justify-center gap-4">
+      <a href="/signup" class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold px-6 py-3 rounded-full transition duration-300" aria-label="Sign up for the Learning Management System">
+        Sign Up
+      </a>
+      <a href="/signin" class="inline-block bg-gray-700 hover:bg-gray-800 text-white text-lg font-semibold px-6 py-3 rounded-full transition duration-300" aria-label="Sign in to the Learning Management System">
+        Sign In
+      </a>
     </div>
   </div>
 </body>

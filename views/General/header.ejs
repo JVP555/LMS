@@ -4,28 +4,64 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<style>
-  * {
-    cursor: default;
-  }
-  button, a[href], input[type="submit"], .cursor-pointer {
-    cursor: pointer;
-  }
-  input[type="text"], textarea, .cursor-text {
-    cursor: text;
-  }
-</style>  
+  <title>LMS with Dark Mode</title>
+  <style>
+    * {
+      cursor: default;
+    }
+    button, a[href], input[type="submit"], .cursor-pointer {
+      cursor: pointer;
+    }
+    input[type="text"], textarea, .cursor-text {
+      cursor: text;
+    }
 
-<body class="bg-gray-100">
+    /* Custom Dark Mode Styles */
+    body.dark {
+      background-color: #2d3748; /* gray-900 */
+      color: white; /* gray-100 */
+    }
+
+    body.dark nav {
+      background-color: #2d3748; 
+      border-color: white;
+    }
+
+    body.dark .navbar-button,
+    body.dark input[type="submit"] {
+      background-color: black !important;
+      color: white !important;
+      border-color: white !important;
+
+    }
+
+    body.dark input, body.dark textarea {
+      background-color: #2d3748;
+      color: white;
+    }
+
+    body.dark svg, body.dark p {
+      color: white;
+    }
+
+    body.dark .lightborder {
+      border-color: white;
+    }
+
+    body.dark h1, body.dark h2, body.dark h3, body.dark h4, body.dark h5, body.dark h6 {
+      color: white;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 text-black transition duration-300">
 
 <!-- Fixed Navbar -->
-<nav class="fixed top-0 left-0 right-0 z-50 bg-black shadow-md px-4 py-3 flex items-center justify-between">
-  <!-- Left section: Back, Forward, Dashboard, Search -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-black shadow-md px-4 py-3 flex items-center justify-between transition duration-300">
+  <!-- Left section -->
   <div class="flex items-center gap-3">
-    <!-- Back & Forward -->
-    <button onclick="history.back()" class="text-white hover:text-black bg-gray-800 hover:bg-white border border-transparent hover:border-gray-800 text-xl shadow-md hover:shadow-lg rounded-full px-3 py-1 transition duration-200">&lt;</button>
-    <button onclick="history.forward()" class="text-white hover:text-black bg-gray-800 hover:bg-white border border-transparent hover:border-gray-800 text-xl shadow-md hover:shadow-lg rounded-full px-3 py-1 transition duration-200">&gt;</button>
+    <button onclick="history.back()" class="text-white hover:text-black navbar-button bg-gray-800 hover:bg-white border border-transparent hover:border-gray-800 text-xl shadow-md hover:shadow-lg rounded-full px-3 py-1 transition duration-200">&lt;</button>
+    <button onclick="history.forward()" class="text-white hover:text-black navbar-button bg-gray-800 hover:bg-white border border-transparent hover:border-gray-800 text-xl shadow-md hover:shadow-lg rounded-full px-3 py-1 transition duration-200">&gt;</button>
     <% if (breadcrumb && breadcrumb.length > 0) { %>
       <% breadcrumb.forEach((item, index) => { %>
         <% if (item.href) { %>
@@ -37,44 +73,65 @@
           <span class="text-white">&gt;</span>
         <% } %>
       <% }) %>
-    <% } else { %>
     <% } %>
   </div>
+
   <!-- Center: Greeting -->
   <div class="text-xl font-semibold text-white px-3 py-1 mx-auto">
     Hello, <span class="font-bold"><%= user.firstname %> <%= user.lastname %>!</span>
   </div>
 
-  <!-- Right section: Conditional and fixed buttons -->
+  <!-- Right section -->
   <div class="flex items-center gap-4">
-    <!-- Show Course Reports only on Dashboard -->
     <% if (showDashboardFeatures) { %>
       <div class="flex flex-grow ml-4 border border-black rounded bg-white">
-        <input type="text" placeholder="Search..." class="w-96 px-3 py-1 rounded-l text-black focus:outline-none" />
-        <button class="bg-indigo-600 hover:bg-indigo-700 text-white border-l border-black px-4 rounded-r">
+        <input type="text" placeholder="Search..." class="w-96 px-3 py-1 rounded-l border text-black focus:outline-none" />
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white border border-black px-4 rounded-r navbar-button">
           <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
           </svg>
         </button>
       </div>
-      <% if (showDashboardFeaturesstudent) { %>  
-        <button onclick="window.location.href='/student/viewreport'" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-1 rounded shadow-md transition duration-200">View Course Reports</button>
-        <!-- Change Password -->
+      <% if (showDashboardFeaturesstudent) { %>
+        <button onclick="window.location.href='/student/viewreport'" class="navbar-button bg-sky-600 hover:bg-sky-700 px-4 py-1 rounded shadow-md transition duration-200">View Course Reports</button>
       <% } %>
-      <button onclick="window.location.href='/changepassword/<%= user.id %>'" class="bg-amber-500 hover:bg-amber-600 text-black px-4 py-1 rounded shadow-md transition duration-200">Change Password</button>
+      <button onclick="window.location.href='/changepassword/<%= user.id %>'" class="navbar-button bg-amber-500 hover:bg-amber-600 text-black px-4 py-1 rounded shadow-md transition duration-200">Change Password</button>
     <% } %>
+
+    <!-- Dark Mode Toggle Button -->
+    <button id="darkModeToggle" class="navbar-button bg-white text-black px-4 py-1 rounded shadow-md transition duration-200">
+      Dark Mode (○)
+    </button>
+
     <!-- Sign Out -->
-    <button onclick="window.location.href='/logout'" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-1 rounded shadow-md transition duration-200">Sign Out</button>
+    <button onclick="window.location.href='/logout'" class="navbar-button bg-rose-600 hover:bg-rose-700 text-white px-4 py-1 rounded shadow-md transition duration-200">Sign Out</button>
   </div>
 </nav>
-<main class="pt-20 px-6">
-  <!-- Your page-specific content goes here -->
-  <h1 class="text-xl font-bold"></h1>
-  <!-- More content... -->
-</main>
+
+<main class="mb-20"></main>
+
+<!-- Script for Toggle -->
+<script>
+  const body = document.body;
+  const toggleBtn = document.getElementById('darkModeToggle');
+
+  function updateToggleText(isDark) {
+    toggleBtn.textContent = isDark ? 'Dark Mode (●)' : 'Dark Mode (○)';
+  }
+
+  let isDark = localStorage.getItem('theme') === 'dark';
+  if (isDark) {
+    body.classList.add('dark');
+  }
+  updateToggleText(isDark);
+
+  toggleBtn.addEventListener('click', () => {
+    isDark = !body.classList.contains('dark');
+    body.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    updateToggleText(isDark);
+  });
+</script>
 
 </body>
 </html>
-
-
- <!-- More content... -->

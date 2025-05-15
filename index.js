@@ -18,6 +18,7 @@ if (process.env.NODE_ENV !== "production") {
       "Received SIGTSTP, terminating process and killing the port..."
     );
 
+    // eslint-disable-next-line no-unused-vars
     exec(`lsof -ti:${PORT} | xargs kill -9`, (err, stdout, stderr) => {
       if (err) {
         console.error(`Error killing port: ${err}`);

@@ -31,8 +31,8 @@
       <% pages.forEach(page => { %>
         <% if (title === 'My Pages') { %>
           <div 
-            onclick="window.location.href='/my-page/<%= page.id %>'" 
-            class="cursor-pointer flex justify-between items-center p-4 border rounded-xl shadow-md hover:shadow-lg hover:bg-gray-100 transition"
+            onclick="window.location.href='/my-page/<%= page.id %>'"
+            class="cursor-pointer flex justify-between items-center p-4 border rounded-xl shadow-md  hover:shadow-lg hover:bg-gray-100 transition"
           >
             <span class="text-lg font-semibold text-blue-700"><%= page.title %></span>
             <div class="flex gap-3">

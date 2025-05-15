@@ -183,7 +183,7 @@ router.post("/changepassword/:userId", ensureLoggedIn, async (req, res) => {
 // Logout
 router.get("/logout", (req, res) => {
   req.session.destroy();
-  res.redirect("/signin");
+  res.redirect("/");
 });
 
 module.exports = router;
