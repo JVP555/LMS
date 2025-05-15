@@ -10,7 +10,6 @@
     "start": "node index.js",
     "dev": "NODE_OPTIONS='--no-deprecation' nodemon index.js"
   },
-
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JVP555/wd201.git"
@@ -24,7 +23,10 @@
   "homepage": "https://github.com/JVP555/wd201#readme",
   "description": "",
   "jest": {
-    "reporters": ["jest-spec-reporter", "default"]
+    "reporters": [
+      "jest-spec-reporter",
+      "default"
+    ]
   },
   "devDependencies": {
     "husky": "^8.0.0",
@@ -42,6 +44,13 @@
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-session": "^1.18.1",
-    "mysql2": "^3.14.1"
+    "mysql2": "^3.14.1",
+    "sequelize": "^6.37.7"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }
