@@ -1,2 +1,2 @@
-cd LMS && npm test
+npm test
 npx lint-staged

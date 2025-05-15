@@ -4,12 +4,13 @@
   "main": "index.js",
   "scripts": {
     "test": "NODE_OPTIONS='--no-deprecation' NODE_ENV=test jest --runInBand --detectOpenHandles",
-    "prepare": "husky install",
+    "prepare": "test $NODE_ENV != production && husky install || echo 'Skipping husky install in production'",
     "db:create:test": "NODE_ENV=test npx sequelize-cli db:create",
     "pretest": "NODE_ENV=test npx sequelize-cli db:drop && NODE_ENV=test npx sequelize-cli db:create",
     "start": "node index.js",
     "dev": "NODE_OPTIONS='--no-deprecation' nodemon index.js"
   },
+
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JVP555/wd201.git"
