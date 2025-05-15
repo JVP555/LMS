@@ -2,30 +2,36 @@
   "name": "wd201",
   "version": "1.0.0",
   "main": "index.js",
+  "description": "",
+  "author": "JVP555",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JVP555/wd201.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JVP555/wd201/issues"
+  },
+  "homepage": "https://github.com/JVP555/wd201#readme",
   "scripts": {
     "test": "NODE_OPTIONS='--no-deprecation' NODE_ENV=test jest --runInBand --detectOpenHandles",
     "prepare": "test $NODE_ENV != production && husky install || echo 'Skipping husky install in production'",
     "db:create:test": "NODE_ENV=test npx sequelize-cli db:create",
     "pretest": "NODE_ENV=test npx sequelize-cli db:drop && NODE_ENV=test npx sequelize-cli db:create",
     "start": "node index.js",
-    "dev": "NODE_OPTIONS='--no-deprecation' nodemon index.js"
+    "dev": "NODE_OPTIONS='--no-deprecation' nodemon index.js",
+    "build": "npx sequelize-cli db:migrate --env production"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/JVP555/wd201.git"
-  },
-  "keywords": [],
-  "author": "JVP555",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/JVP555/wd201/issues"
-  },
-  "homepage": "https://github.com/JVP555/wd201#readme",
-  "description": "",
   "jest": {
     "reporters": [
       "jest-spec-reporter",
       "default"
+    ]
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
     ]
   },
   "devDependencies": {
@@ -48,11 +54,5 @@
     "mysql2": "^3.14.1",
     "pg": "^8.16.0",
     "sequelize": "^6.37.7"
-  },
-  "lint-staged": {
-    "*.js": [
-      "eslint --fix",
-      "prettier --write"
-    ]
   }
 }

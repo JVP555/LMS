@@ -10,9 +10,22 @@ const config = require(__dirname + "/../config/config.json")[env];
 const db = {};
 
 let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+
+// Use DATABASE_URL in production (Render)
+if (process.env.DATABASE_URL) {
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: "postgres",
+    protocol: "postgres",
+    logging: false, // disable SQL logging
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false, // For Render's managed Postgres
+      },
+    },
+  });
 } else {
+  // Local dev/test environment
   sequelize = new Sequelize(
     config.database,
     config.username,
@@ -21,7 +34,7 @@ if (config.use_env_variable) {
   );
 }
 
-// Read all models in the models directory
+// Read all model files and import
 fs.readdirSync(__dirname)
   .filter((file) => {
     return (
@@ -39,7 +52,7 @@ fs.readdirSync(__dirname)
     db[model.name] = model;
   });
 
-// Run associations
+// Setup associations
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
     db[modelName].associate(db);

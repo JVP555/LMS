@@ -16,7 +16,7 @@ const {
   ensureStudent,
 } = require("./middleware");
 
-const { sequelize } = require("./models"); // Make sure this exports your Sequelize instance
+const { sequelize } = require("./models"); // Sequelize instance
 
 const app = express();
 
@@ -26,10 +26,8 @@ app.use(bodyParser.json({ limit: "2mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "2mb" }));
 app.use(cookieParser());
 
-// Session configuration using SequelizeStore
-const sessionStore = new SequelizeStore({
-  db: sequelize,
-});
+// Session setup
+const sessionStore = new SequelizeStore({ db: sequelize });
 
 app.use(
   session({
@@ -51,7 +49,6 @@ const csrfProtection = csrf({ cookie: true });
 
 if (process.env.NODE_ENV !== "test") {
   app.use(csrfProtection);
-
   app.use((req, res, next) => {
     res.locals.csrfToken = req.csrfToken();
     res.locals.user = req.session.user;
@@ -59,7 +56,7 @@ if (process.env.NODE_ENV !== "test") {
     next();
   });
 } else {
-  // In test environment, mock csrfToken and user
+  // Mock CSRF in test
   app.use((req, res, next) => {
     res.locals.csrfToken = "test-csrf-token";
     res.locals.user = req.session.user;
@@ -68,11 +65,11 @@ if (process.env.NODE_ENV !== "test") {
   });
 }
 
-// View Engine
+// View engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// Route handlers
+// Routes
 const generalRoutes = require("./routes/general");
 const educatorRoutes = require("./routes/educator");
 const studentRoutes = require("./routes/student");
