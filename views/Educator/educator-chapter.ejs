@@ -14,10 +14,10 @@
       <%- include('../General/notifications', { messages: messages }) %>
 
       <div class="mb-6 flex justify-end">
-        <a href="/my-courses/<%= course.id %>/my-chapters/new?redirectTo=/my-chapters/<%= course.id %>" 
-           class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl font-medium shadow transition">
+        <button onclick="window.location.href=`/my-courses/<%= course.id %>/my-chapters/new?redirectTo=/my-chapters/<%= course.id %>`" 
+           class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 border rounded-xl font-medium shadow transition">
           ➕ Create New Chapter
-        </a>
+        </button>
       </div>
     <% } %>
 

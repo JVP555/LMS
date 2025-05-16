@@ -6,11 +6,11 @@
   <title>Educator | Course Enrollment Reports</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-  .bg-hunter { background-color: #1e3f3f; }
-  .text-hunter { color: white; }
+  body.dark .bg-hunter { background-color: #1e3f3f; }
+  body.dark .text-hunter { color: white; }
 
-  .bg-cream { background-color: #fdfaf5; }
-  .text-cream { color: white; }
+  body.dark .bg-cream { background-color: #fdfaf5; }
+  body.dark .text-cream { color: white; }
   </style>
 
 </head>
@@ -27,7 +27,7 @@
     <% } else { %>
       <div class="overflow-x-auto rounded-xl shadow-md border border-gray-200 bg-white-custom">
       <table class="w-full table-auto rounded-xl overflow-hidden">
-        <thead class="bg-gray-100 text-left text-gray-700">
+        <thead class="bg-gray-100 text-left text-gray-700 text-center">
           <tr>
             <th class="px-4 py-2">#</th>
             <th class="px-4 py-2">Course Title</th>
@@ -35,10 +35,10 @@
             <th class="px-4 py-2">Relative Popularity</th>
           </tr>
         </thead>
-        <tbody class="text-gray-800">
+        <tbody class="text-gray-800 text-center">
           <% reportData.forEach((report, index) => { %>
             <tr class="border-t hover:bg-cream transition-colors">
-              <td class="px-4 py-3 text-hunter"><%= index + 1 %></td>
+              <td class="px-4 py-3 text-hunter "><%= index + 1 %></td>
               <td class="px-4 py-3 font-medium">
                 <a href="/my-chapters/<%= report.course.id %>" class="text-hunter hover:underline">
                   <%= report.course.coursename %>

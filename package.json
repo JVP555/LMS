@@ -19,7 +19,7 @@
     "db:create:test": "NODE_ENV=test npx sequelize-cli db:create",
     "pretest": "NODE_ENV=test npx sequelize-cli db:drop && NODE_ENV=test npx sequelize-cli db:create",
     "start": "npm run migrate && NODE_OPTIONS='--no-deprecation' node index.js",
-    "dev": "NODE_OPTIONS='--no-deprecation' nodemon index.js",
+    "dev": "NODE_OPTIONS='--no-deprecation' node index.js",
     "build": "npx sequelize-cli db:migrate --env production",
     "migrate": "npx sequelize-cli db:migrate"
   },

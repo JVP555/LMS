@@ -17,10 +17,10 @@
         <h1 class="text-3xl font-bold text-slate-900">
           <%= title %> in <span class="text-emerald-700"><%= chapter.chaptername %></span>
         </h1>
-        <a href="/my-chapter/<%= chapter.id %>/my-pages/new?redirectTo=/my-chapter/<%= chapter.id %>/my-pages" 
-           class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl font-medium shadow transition flex items-center gap-2">
+        <button onclick="window.location.href=`/my-chapter/<%= chapter.id %>/my-pages/new?redirectTo=/my-chapter/<%= chapter.id %>/my-pages`" 
+           class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 border rounded-xl font-medium shadow transition flex items-center gap-2">
           <span class="text-xl font-bold">+</span> Create New Page
-        </a>
+        </button>
       </div>
     <% } else { %>
       <h1 class="text-3xl font-bold text-center text-slate-900 mb-6">

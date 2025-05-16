@@ -1,14 +1,21 @@
 <!-- Error Messages -->
+<style>
+  body.dark .darktext{
+    color: black !important;
+  }
+</style>
+
+
 <% if (messages.error && messages.error.length > 0) { %>
   <div class="flex flex-col gap-2 bg-rose-100 text-rose-800 border border-rose-300 rounded-xl p-4 mb-6 shadow-sm">
     <div class="flex items-center gap-2 font-semibold">
       <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path d="M12 9v2m0 4h.01M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z" />
       </svg>
-      <span>Error</span>
+      <span class="darktext">Error</span>
     </div>
     <% messages.error.forEach(function(msg) { %>
-      <p class="ml-6 text-sm"><%= msg %></p>
+      <p class="ml-6 text-sm darktext"><%= msg %></p>
     <% }); %>
   </div>
 <% } %>
@@ -20,10 +27,10 @@
       <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path d="M5 13l4 4L19 7" />
       </svg>
-      <span>Success</span>
+      <span class="darktext">Success</span>
     </div>
     <% messages.success.forEach(function(msg) { %>
-      <p class="ml-6 text-sm"><%= msg %></p>
+      <p class="ml-6 text-sm darktext"><%= msg %></p>
     <% }); %>
   </div>
 <% } %>
