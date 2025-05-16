@@ -1,84 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title><%= title %></title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
 
-<title><%= title %></title>
+<body class="bg-slate-100 text-slate-800 min-h-screen font-sans">
 
-
-
-<% if (title === 'My Courses') { %>
-  <%- include('../General/header') %>
-  <header class="text-center my-6">
-    <%- include('../General/notifications', { messages: messages }) %>
-    <h1 class="text-3xl font-bold underline text-gray-800">My Courses</h1>
-  </header>
-<% } %>
-<body>
-<!-- Main Course Grid -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ml-5 mr-5">
-  <% if (courses.length === 0) { %>
-    <p class="text-center text-gray-600">No courses found.</p>
-  <% } else { %>  
-    <% courses.forEach(course => { %>
-      <div class="border border-black p-4 rounded shadow-md lightborder">
-        <div class="flex justify-between items-center mb-2">
-          <h3 class="text-lg font-semibold"><%= course.coursename %></h3>
-          <% if (title === 'My Courses') { %>
-            <div class="flex space-x-2">
-              <a href="/courses/<%= course.id %>/edit?redirectTo=/my-courses">
-                <!-- Edit icon -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-10 mt-2" viewBox="0 0 100 100">
-                  <path d="M 43.125 2 C 41.878906 2 40.636719 2.488281 39.6875 3.4375 L 38.875 4.25 L 45.75 11.125 C 45.746094 11.128906 46.5625 10.3125 46.5625 10.3125 C 48.464844 8.410156 48.460938 5.335938 46.5625 3.4375 C 45.609375 2.488281 44.371094 2 43.125 2 Z M 37.34375 6.03125 C 37.117188 6.0625 36.90625 6.175781 36.75 6.34375 L 4.3125 38.8125 C 4.183594 38.929688 4.085938 39.082031 4.03125 39.25 L 2.03125 46.75 C 1.941406 47.09375 2.042969 47.457031 2.292969 47.707031 C 2.542969 47.957031 2.90625 48.058594 3.25 47.96875 L 10.75 45.96875 C 10.917969 45.914063 11.070313 45.816406 11.1875 45.6875 L 43.65625 13.25 C 44.054688 12.863281 44.058594 12.226563 43.671875 11.828125 C 43.285156 11.429688 42.648438 11.425781 42.25 11.8125 L 9.96875 44.09375 L 5.90625 40.03125 L 38.1875 7.75 C 38.488281 7.460938 38.578125 7.011719 38.410156 6.628906 C 38.242188 6.246094 37.855469 6.007813 37.4375 6.03125 C 37.40625 6.03125 37.375 6.03125 37.34375 6.03125 Z"></path>
-                </svg>
-              </a>
-              <form action="/courses/<%= course.id %>/delete?redirectTo=<%= title === 'My Courses' ? '/my-courses' : '/courses' %>" method="POST" class="inline-block">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-
-                <button type="submit">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 pt-1" viewBox="0 0 100 100">
-                    <path d="M 46 13 C 44.35503 13 43 14.35503 43 16 L 43 18 L 32.265625 18 C 30.510922 18 28.879517 18.922811 27.976562 20.427734 L 26.433594 23 L 23 23 C 20.802666 23 19 24.802666 19 27 C 19 29.197334 20.802666 31 23 31 L 24.074219 31 L 27.648438 77.458984 C 27.88773 80.575775 30.504529 83 33.630859 83 L 66.369141 83 C 69.495471 83 72.11227 80.575775 72.351562 77.458984 L 75.925781 31 L 77 31 C 79.197334 31 81 29.197334 81 27 C 81 24.802666 79.197334 23 77 23 L 73.566406 23 L 72.023438 20.427734 C 71.120481 18.922811 69.489078 18 67.734375 18 L 57 18 L 57 16 C 57 14.35503 55.64497 13 54 13 L 46 13 z M 45 18 L 55 18 L 55 16 C 55 15.43497 54.56503 15 54 15 L 46 15 C 45.43497 15 45 15.43497 45 16 Z"></path>
-                  </svg>
-                </button>
-              </form>
-            </div>
-            
-          <% } %>
-        </div>
-
-        <p class="text-gray-600">
-          By 
-          <% if (title === 'My Courses') { %>
-            You
-          <% } else { %>
-            <%= course.User.firstname %> <%= course.User.lastname %>
-          <% } %>
-        </p>
-
-        <div class="flex items-center text-gray-700 my-2 gap-2">
-            <svg class="w-6 h-6 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M3.78552 9.5 12.7855 14l9-4.5-9-4.5-8.99998 4.5Zm0 0V17m3-6v6.2222c0 .3483 2 1.7778 
-                5.99998 1.7778 4 0 6-1.3738 6-1.7778V11" />
-            </svg>
-          <h4><%= enrollmentMap[course.id] || 0 %> Enrollments</h4>
-        </div>
-
-
-          <% if (title !== 'My Courses') { %>
-            <div class="flex space-x-2 mt-4">
-              <a href="/courses/<%= course.id %>/chapters" class="bg-cyan-400 text-black navbar-button px-3 py-1 rounded hover:bg-cyan-500 transition">
-                View Course
-              </a>
-            <button class="bg-green-500 text-white px-3 py-1 rounded navbar-button hover:bg-green-600 transition">
-              Enroll
-            </button>
-          <% }else { %>
-            <div class="flex space-x-2 mt-4">
-              <a href="/my-chapters/<%= course.id %>" class="bg-cyan-400 text-black navbar-button px-3 py-1 rounded hover:bg-cyan-500 transition">
-                View Course
-              </a>
-            <% } %>
-        </div>
+  <% if (title === 'My Courses') { %>
+    <%- include('../General/header') %>
+    <header class="bg-slate-800 text-white py-10 shadow-md">
+      <div class="text-center">
+        <%- include('../General/notifications', { messages: messages }) %>
+        <h1 class="text-4xl font-bold tracking-wide"><%= title %></h1>
       </div>
-    <% }) %>
+    </header>
   <% } %>
-</div>
-</body>
 
+  <main class="px-6 md:px-12 lg:px-20 py-12">
+    <% if (courses.length === 0) { %>
+      <p class="text-center text-slate-500 text-lg">🚫 No courses found.</p>
+    <% } else { %>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <% courses.forEach(course => { %>
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6">
+
+            <div class="flex justify-between items-start mb-3">
+              <h3 class="text-xl font-semibold text-slate-800"><%= course.coursename %></h3>
+
+              <% if (title === 'My Courses') { %>
+                <div class="flex space-x-2">
+                  <a href="/courses/<%= course.id %>/edit?redirectTo=/my-courses"
+                     title="Edit Course"
+                     class="text-amber-600 hover:text-amber-800 text-lg transition">
+                    ✏️
+                  </a>
+                  <form action="/courses/<%= course.id %>/delete?redirectTo=/my-courses" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit"
+                            title="Delete Course"
+                            class="text-red-600 hover:text-red-800 text-lg transition">
+                      🗑️
+                    </button>
+                  </form>
+                </div>
+              <% } %>
+            </div>
+
+            <p class="text-sm text-slate-500 mb-2">
+              By
+              <% if (title === 'My Courses') { %>You<% } else { %>
+                <%= course.User.firstname %> <%= course.User.lastname %>
+              <% } %>
+            </p>
+
+            <div class="flex items-center text-sm text-slate-600 mb-4 gap-2">
+              <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3.78552 9.5 12.7855 14l9-4.5-9-4.5-8.99998 4.5Zm0 0V17m3-6v6.2222c0 .3483 2 1.7778 
+                      5.99998 1.7778 4 0 6-1.3738 6-1.7778V11"/>
+              </svg>
+              <span><%= enrollmentMap[course.id] || 0 %> Enrollments</span>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+              <% if (title === 'My Courses') { %>
+                <a href="/my-chapters/<%= course.id %>"
+                   class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-md shadow transition">
+                  📘 View Course
+                </a>
+              <% } else { %>
+                <a href="/courses/<%= course.id %>/chapters"
+                   class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-md border rounded-xl shadow transition">
+                  📘 View Course
+                </a>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 border rounded-xl rounded-md shadow transition">
+                  ➕ Enroll
+                </button>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </main>
+</body>
+</html>

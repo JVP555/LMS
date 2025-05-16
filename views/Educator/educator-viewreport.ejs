@@ -5,19 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Educator | Course Enrollment Reports</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+  .bg-hunter { background-color: #1e3f3f; }
+  .text-hunter { color: white; }
+
+  .bg-cream { background-color: #fdfaf5; }
+  .text-cream { color: white; }
+  </style>
+
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans">
+<body class="bg-cream text-gray-900 font-sans min-h-screen flex flex-col">
   <%- include('../General/header') %>
-  <div class="p-6 max-w-5xl mx-auto">
-    <h1 class="text-3xl font-bold mb-6">Course Enrollment Reports</h1>
+
+  <main class="p-6 max-w-5xl mx-auto w-full flex-grow">
+    <h1 class="text-3xl font-bold mb-6 text-hunter">Course Enrollment Reports</h1>
 
     <% if (reportData.length === 0) { %>
-      <div class="text-center text-gray-500 mt-12">
+      <div class="text-center text-gray-500 mt-20">
         <p>No courses available to display reports.</p>
       </div>
     <% } else { %>
-      <table class="w-full table-auto border border-gray-300 shadow-md rounded-lg overflow-hidden">
-        <thead class="bg-gray-100 text-left">
+      <div class="overflow-x-auto rounded-xl shadow-md border border-gray-200 bg-white-custom">
+      <table class="w-full table-auto rounded-xl overflow-hidden">
+        <thead class="bg-gray-100 text-left text-gray-700">
           <tr>
             <th class="px-4 py-2">#</th>
             <th class="px-4 py-2">Course Title</th>
@@ -25,21 +35,21 @@
             <th class="px-4 py-2">Relative Popularity</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="text-gray-800">
           <% reportData.forEach((report, index) => { %>
-            <tr class="border-t hover:bg-gray-50">
-              <td class="px-4 py-2"><%= index + 1 %></td>
-                <td class="px-4 py-2 font-medium">
-                <a href="/my-chapters/<%= report.course.id %>" class="text-black-600 hover:text-blue-800">
-                    <%= report.course.coursename %>
+            <tr class="border-t hover:bg-cream transition-colors">
+              <td class="px-4 py-3 text-hunter"><%= index + 1 %></td>
+              <td class="px-4 py-3 font-medium">
+                <a href="/my-chapters/<%= report.course.id %>" class="text-hunter hover:underline">
+                  <%= report.course.coursename %>
                 </a>
               </td>
-              <td class="px-4 py-2"><%= report.enrolledCount %></td>
-              <td class="px-4 py-2">
+              <td class="px-4 py-3 text-hunter"><%= report.enrolledCount %></td>
+              <td class="px-4 py-3">
                 <div class="flex items-center gap-2">
-                  <div class="w-full bg-gray-200 rounded-full h-2.5">
+                  <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
                     <% if (typeof report.percentage !== "undefined") { %>
-                    <div class="bg-green-500 h-2.5 rounded-full" style="width: <%= report.percentage %>%"></div>
+                      <div class="bg-green-500 h-2.5 rounded-full transition-all duration-500 ease-in-out" style="width: <%= report.percentage %>%"></div>
                     <% } %>
                   </div>
                   <span class="text-sm text-gray-600 whitespace-nowrap"><%= report.percentage %>%</span>
@@ -49,8 +59,10 @@
           <% }) %>
         </tbody>
       </table>
-    <% } %>
-  </div>
+    </div>
 
+    <% } %>
+  </main>
 </body>
+
 </html>

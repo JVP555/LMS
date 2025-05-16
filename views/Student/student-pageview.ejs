@@ -24,22 +24,24 @@
     </div>
 
     <!-- Mark as Completed Button (only for creator) -->
-    <% if (user && user.id === page.Chapter.Course.userId) { %>
+    <% if (user && user.role === 'student') { %>
       <div class="w-full flex justify-center mt-6">
         <div class="w-[44rem] max-w-full flex justify-center">
-          <form action="/markCompleted/<%= page.id %>" method="POST" class="w-full">
+          <form action="/student/markCompleted/<%= page.id %>" method="POST" class="w-full">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button type="submit"
               class="w-full px-6 py-2 rounded-md shadow-sm text-lg font-semibold transition duration-200
                 <%= page.completed
                   ? 'text-green-600 border border-green-400 cursor-default'
-                  : 'border border-yellow-400 text-yellow-600 hover:bg-yellow-100' %>">
+                  : 'border border-yellow-400 text-yellow-600 hover:bg-yellow-100' %>"
+              <%= page.completed ? 'disabled' : '' %>>
               <%= page.completed ? '✓✓ Completed' : '• Mark as Completed' %>
             </button>
           </form>
         </div>
       </div>
     <% } %>
+
 
     <!-- Fixed Bottom Navigation -->
     <div class="fixed bottom-0 left-0 w-full bg-white shadow-inner z-20">

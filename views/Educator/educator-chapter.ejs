@@ -1,60 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col ml-5 mr-5">
+
+<body class="bg-gray-50 min-h-screen font-sans text-slate-800">
   <%- include('../General/header') %>
 
-  <% if (title === 'My Chapters') { %>
-
-    <%- include('../General/notifications', { messages: messages }) %>
-    <div class="mb-4">
-      <a href="/my-courses/<%= course.id %>/my-chapters/new?redirectTo=/my-chapters/<%= course.id %>" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-        + Create New Chapter
-      </a>
-    </div>
-  <% } %>
-
-  <h1 class="text-2xl font-bold mb-4 mt-3 text-gray-800">
-    <%= title %> in <%= course.coursename %>
-  </h1>
-  <% if (chapters.length === 0) { %>
-    <p class="text-center text-gray-600">No chapters found in this course.</p>
-  <% } else { %>
-    <div class="flex flex-col gap-4 w-full md:w-3/5 mt-4">
-  <% chapters.forEach(ch => { %>
+  <main class="max-w-5xl mx-auto px-6 py-10">
     <% if (title === 'My Chapters') { %>
-      <div 
-        onclick="window.location.href='/my-chapters/<%= ch.id %>/my-pages?redirectTo=/my-chapters/<%= course.id %>'" 
-        class="cursor-pointer flex justify-between items-center p-4 border rounded-xl shadow-md hover:shadow-lg hover:bg-gray-100 transition"
-      >
-    <% }else { %>
-      <div 
-        onclick="window.location.href='/chapters/<%= ch.id %>/pages'" 
-        class="cursor-pointer flex justify-between items-center p-4 border rounded-xl shadow-md hover:shadow-lg hover:bg-gray-100 transition"
-      >
+      <%- include('../General/notifications', { messages: messages }) %>
+
+      <div class="mb-6 flex justify-end">
+        <a href="/my-courses/<%= course.id %>/my-chapters/new?redirectTo=/my-chapters/<%= course.id %>" 
+           class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl font-medium shadow transition">
+          ➕ Create New Chapter
+        </a>
+      </div>
     <% } %>
-      <span class="text-lg font-semibold text-blue-700">
-        <%= ch.chaptername %>
-      </span>
-      <% if (title === 'My Chapters') { %>
-        <div class="flex gap-3">
-          <a href="/chapters/<%= ch.id %>/edit?redirectTo=/my-chapters/<%= course.id %>" class="text-blue-600 hover:text-blue-800">
-            Edit
-          </a>
-          <form action="/chapters/<%= ch.id %>/delete?redirectTo=/my-chapters/<%= course.id %>" method="POST" onClick="event.stopPropagation();">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
-            <button type="submit" class="text-red-600 hover:text-red-800">Delete</button>
-          </form>
-        </div>
-      <% } %>
-    </div>
-  <% }) %>
-</div>
+    <h1 class="text-3xl font-bold text-slate-900 mb-6">
+      <%= title %> in <span class="text-emerald-700"><%= course.coursename %></span>
+    </h1>
 
-  <% } %>
+    <% if (chapters.length === 0) { %>
+      <p class="text-center text-slate-500 text-lg mt-6">No chapters found in this course.</p>
+    <% } else { %>
+      <div class="flex flex-col gap-4 w-full md:w-3/4">
 
+        <% chapters.forEach(ch => { %>
+          <% let chapterLink = (title === 'My Chapters') 
+              ? `/my-chapters/${ch.id}/my-pages?redirectTo=/my-chapters/${course.id}` 
+              : `/chapters/${ch.id}/pages`; 
+          %>
+
+          <div 
+            onclick="window.location.href='<%= chapterLink %>'" 
+            class="cursor-pointer flex justify-between items-center p-5 border border-gray-200 bg-white rounded-2xl shadow hover:shadow-md hover:bg-gray-100 transition"
+          >
+            <span class="text-lg font-semibold text-slate-800">
+              <%= ch.chaptername %>
+            </span>
+
+            <% if (title === 'My Chapters') { %>
+              <div class="flex gap-4 items-center" onclick="event.stopPropagation();">
+                <a href="/chapters/<%= ch.id %>/edit?redirectTo=/my-chapters/<%= course.id %>" 
+                   class="text-blue-600 hover:text-blue-800 font-medium">
+                  ✏️ Edit
+                </a>
+                <form action="/chapters/<%= ch.id %>/delete?redirectTo=/my-chapters/<%= course.id %>" method="POST">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button type="submit" class="text-red-600 hover:text-red-800 font-medium">
+                    🗑️ Delete
+                  </button>
+                </form>
+              </div>
+            <% } %>
+          </div>
+        <% }) %>
+
+      </div>
+    <% } %>
+  </main>
 </body>
 </html>
