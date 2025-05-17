@@ -84,14 +84,16 @@
   <div class="flex items-center gap-3">
     <% if (showDashboardFeatures) { %>
       <!-- Search Box -->
-      <div class="flex border border-black rounded overflow-hidden bg-white input-box">
-        <input type="text" placeholder="Search..." class="w-64 px-3 py-1 border-r text-black focus:outline-none" />
+      <form action="/search" method="GET" class="flex border border-black rounded overflow-hidden bg-white input-box">
+        <input type="text" name="query" placeholder="Search..." class="w-64 px-3 py-1 border-r text-black focus:outline-none" />
         <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
           </svg>
         </button>
-      </div>
+      </form>
+
+
       <% if (showDashboardFeaturesstudent) { %>
         <button onclick="window.location.href='/student/viewreport'" class="navbar-button bg-sky-600 hover:bg-sky-700 text-white px-4 py-1 rounded shadow-md transition">Reports</button>
       <% } %>

@@ -1,12 +1,21 @@
+/* eslint-disable no-unused-vars */
+// Import middleware from router.js
+
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const { User } = require("../models");
 
-// Import middleware from router.js
-// eslint-disable-next-line no-unused-vars
+const {
+  User,
+  Course,
+  Chapter,
+  Page,
+  UserCourses,
+  PageCompletion,
+} = require("../models");
+
 const { ensureLoggedIn, ensureRole } = require("../middleware");
-
+const { Op } = require("sequelize");
 //________________________General_________________________________________________________-
 router.get("/", (req, res) => {
   if (req.session.user) {
@@ -177,6 +186,55 @@ router.post("/changepassword/:userId", ensureLoggedIn, async (req, res) => {
     console.error(err);
     req.flash("error", "An error occurred while changing password.");
     res.redirect(`/changepassword/${userId}`);
+  }
+});
+
+router.get("/search", async (req, res) => {
+  const query = req.query.query?.trim();
+  if (!query) return res.redirect(`/${req.session.user.role}`);
+
+  try {
+    const courses = await Course.findAll({
+      where: {
+        [Op.or]: [
+          {
+            coursename: {
+              [Op.iLike]: `%${query}%`, // partial match on course title
+            },
+          },
+          {
+            userId: isNaN(query) ? -1 : parseInt(query), // match userId if query is a number
+          },
+        ],
+      },
+      include: [
+        {
+          model: User,
+          attributes: ["firstname", "lastname"],
+        },
+      ],
+    });
+
+    res.render("General/search-results", {
+      title: "Search Results",
+      query,
+      courses,
+      user: req.session.user,
+      showDashboardFeatures: true,
+      showDashboardFeaturesstudent: false,
+      breadcrumb: [
+        { label: "Dashboard", href: `/${req.session.user.role}` },
+        { label: "Search" },
+      ],
+      messages: {
+        success: req.flash("success"),
+        error: req.flash("error"),
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Something went wrong during the search.");
+    res.redirect(`/${req.session.user.role}`);
   }
 });
 
