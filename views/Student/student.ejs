@@ -1,91 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title %></title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body.dark span, body.dark a {
+      color: #f7fafc;
+      background-color: black;
+      border-color: #f7fafc !important;
+    }
+  </style>
 </head>
-<body class="bg-white p-8 font-sans">
+<body class="bg-gray-100 text-slate-800 font-sans min-h-screen">
+  <!-- Header -->
   <%- include('../General/header') %>
 
-  <!-- Flash messages -->
-
+  <!-- Notifications -->
   <%- include('../General/notifications', { messages: messages }) %>
 
-
-
-  <!-- Enrolled Courses -->
-  <h2 class="text-2xl font-bold mb-4 underline text-center">You have joined the following courses:</h2>
-  <% if (enrolledCourses.length === 0) { %>
-    <p class="mb-6">No courses enrolled yet.</p>
-  <% } else { %>
-    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-      <% enrolledCourses.forEach(course => { %>
-        <div class="border-2 border-black rounded p-4 shadow-md flex flex-col justify-between">
-          <div>
-            <h3 class="text-xl font-bold mb-2"><%= course.coursename %></h3>
-            <div class="flex justify-between items-center text-gray-700 mb-4">
-              <p class="text-gray-600 font-bold"><%= course.User.firstname %> <%= course.User.lastname %></p>
-              <div class="flex items-center gap-1">
-                <svg class="w-6 h-6 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M3.78552 9.5 12.7855 14l9-4.5-9-4.5-8.99998 4.5Zm0 0V17m3-6v6.2222c0 .3483 2 1.7778 
-                    5.99998 1.7778 4 0 6-1.3738 6-1.7778V11" />
-                </svg>
-                <span class="font-semibold"><%= enrollmentMap[course.id] || 0 %></span>
+  <div class="max-w-7xl mx-auto px-6 py-10">
+    <!-- Enrolled Courses Section -->
+    <section class="bg-white rounded-2xl shadow p-8 mb-12">
+      <h2 class="text-3xl font-bold text-center text-slate-900 mb-8 underline decoration-black">
+        You have joined the following courses:
+      </h2>
+      <% if (enrolledCourses.length === 0) { %>
+        <p class="text-center text-gray-600">No courses enrolled yet.</p>
+      <% } else { %>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <% enrolledCourses.forEach(course => { %>
+            <div class="bg-white border border-gray-200 rounded-xl shadow hover:shadow-lg transition p-5 flex flex-col justify-between">
+              <div>
+                <h3 class="text-xl font-semibold text-blue-700 mb-2"><%= course.coursename %></h3>
+                <p class="text-gray-700 mb-2">
+                  Educator: <span class="font-medium"><%= course.User.firstname %> <%= course.User.lastname %></span>
+                </p>
+                <div class="flex items-center text-sm text-gray-600 mb-4">
+                  <svg class="w-5 h-5 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3.78552 9.5L12.7855 14l9-4.5-9-4.5-8.99998 4.5Z" />
+                  </svg>
+                  <span><%= enrollmentMap[course.id] || 0 %> learners</span>
+                </div>
+              </div>
+              <div class="flex gap-4 mt-auto">
+                <a href="/student/courses/<%= course.id %>/chapters"
+                   class="w-1/2 h-12 bg-blue-600 hover:bg-blue-700 text-white border rounded-xl text-center px-4 py-2 rounded-lg font-medium transition flex items-center justify-center">
+                  Continue
+                </a>
+                <span class="w-1/2 h-12 bg-purple-600 text-white border rounded-xl text-center px-3 py-2 rounded-lg font-semibold flex items-center justify-center">
+                  Completed: <%= completionPercentage[course.id] || 0 %>%
+                </span>
               </div>
             </div>
-          </div>
-          <div class="flex gap-4">
-            <a href="student/courses/<%= course.id %>/chapters" class="w-1/2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow flex justify-center items-center gap-1">
-              Continue
-              <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 18V6l8 6-8 6Z"/>
-              </svg>
-            </a>
-            <div class="w-1/2 bg-purple-600 text-white px-2 py-3 rounded shadow text-center font-semibold">
-              Completed: <%= completionPercentage[course.id] || 0 %>%
+          <% }) %>
+        </div>
+      <% } %>
+    </section>
+
+    <!-- Available Courses Section -->
+    <section class="bg-white rounded-2xl shadow p-8">
+      <h2 class="text-3xl font-bold text-center text-slate-900 mb-8 underline decoration-black">
+        Available Courses
+      </h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% allCourses.forEach(course => {
+             if (!enrolledCourseIds.includes(course.id)) { %>
+          <div class="bg-white border border-gray-200 rounded-xl shadow hover:shadow-lg transition p-5 flex flex-col justify-between">
+            <div>
+              <h3 class="text-xl font-semibold text-blue-700 mb-2"><%= course.coursename %></h3>
+              <p class="text-gray-700 mb-2">
+                Educator: <span class="font-medium"><%= course.User.firstname %> <%= course.User.lastname %></span>
+              </p>
+              <div class="flex items-center text-sm text-gray-600 mb-4">
+                <svg class="w-5 h-5 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3.78552 9.5L12.7855 14l9-4.5-9-4.5-8.99998 4.5Z" />
+                </svg>
+                <span><%= enrollmentMap[course.id] || 0 %> learners</span>
+              </div>
+            </div>
+            <div class="flex gap-4 mt-auto">
+              <a href="/student/courses/<%= course.id %>/chapters"
+                 class="w-1/2 h-12 bg-cyan-500 hover:bg-cyan-600 text-white text-center border rounded-xl px-4 py-2 rounded-lg font-medium transition flex items-center justify-center">
+                View Course
+              </a>
+              <form action="/enroll/<%= course.id %>" method="POST" class="w-1/2">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit"
+                        class="w-full h-12 bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-center border rounded-lg font-medium transition flex items-center justify-center">
+                  Enroll
+                </button>
+              </form>
             </div>
           </div>
-        </div>
-      <% }) %>
-    </div>
-  <% } %>
-  <hr class="my-6 border-t-2 border-gray-400">
-
-  <!-- Available Courses -->
-  <h2 class="text-2xl font-bold mb-4 underline text-center">Available Courses</h2>
-  <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <% allCourses.forEach(course => {
-         if (!enrolledCourseIds.includes(course.id)) { %>
-      <div class="border-2 border-black rounded p-4 shadow-md flex flex-col justify-between">
-        <div>
-          <h3 class="text-xl font-bold mb-2"><%= course.coursename %></h3>
-          <div class="flex justify-between items-center text-gray-700 mb-4">
-            <p class="text-gray-600 font-bold"><%= course.User.firstname %> <%= course.User.lastname %></p>
-            <div class="flex items-center gap-1">
-              <svg class="w-6 h-6 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M3.78552 9.5 12.7855 14l9-4.5-9-4.5-8.99998 4.5Zm0 0V17m3-6v6.2222c0 .3483 2 1.7778 
-                  5.99998 1.7778 4 0 6-1.3738 6-1.7778V11" />
-              </svg>
-              <span class="font-semibold"><%= enrollmentMap[course.id] || 0 %></span>
-            </div>
-          </div>
-        </div>
-        <div class="flex gap-4">
-          <a href="/student/courses/<%= course.id %>/chapters" class="w-1/2 bg-cyan-400 hover:bg-cyan-500 text-black font-semibold px-4 py-3 rounded shadow text-center">
-            View course
-          </a>
-          <form action="/enroll/<%= course.id %>" method="POST" class="w-1/2">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-
-            <button type="submit" class="w-full bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-3 rounded shadow">
-              Enroll
-            </button>
-          </form>
-        </div>
+        <% } }) %>
       </div>
-    <% } }) %>
+    </section>
   </div>
-
 </body>
 </html>

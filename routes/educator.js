@@ -358,7 +358,7 @@ router.get("/my-courses", ensureLoggedIn, async (req, res) => {
         success: req.flash("success"),
       },
       showDashboardFeaturesstudent: false,
-      showDashboardFeatures: true,
+      showDashboardFeatures: false,
       breadcrumb: [
         { label: "Dashboard", href: "/Educator" },
         { label: "My Courses" },
