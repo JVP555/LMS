@@ -7,10 +7,14 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body.dark span, body.dark a {
+    body.dark a{
       color: #f7fafc;
       background-color: black;
       border-color: #f7fafc !important;
+    }
+
+    body.dark .bg-green-600 {
+      background-color: #4b9364 !important;
     }
   </style>
 </head>
@@ -91,7 +95,7 @@
               <form action="/enroll/<%= course.id %>" method="POST" class="w-1/2">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <button type="submit"
-                        class="w-full h-12 bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-center border rounded-lg font-medium transition flex items-center justify-center">
+                        class="w-full h-12 bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-center border rounded-xl font-medium transition flex items-center justify-center">
                   Enroll
                 </button>
               </form>

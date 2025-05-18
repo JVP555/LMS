@@ -1,7 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Educator | Course Enrollment Reports</title>
+  <title>Student Courses Reports</title>
+  <style>
+  body.dark thead { background-color: #1e3f3f; }
+
+  body.dark .bg-cream { background-color: #fdfaf5; }
+  body.dark .text-cream { color: white; }
+  </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
     <%- include('../General/header') %>
@@ -25,10 +31,10 @@
         </thead>
             <tbody>
             <% reportData.forEach((report, index) => { %>
-                <tr class="border-t hover:bg-gray-50">
+                <tr class="border-t">
                 <td class="px-4 py-2"><%= index + 1 %></td>
                 <td class="px-4 py-2 font-medium">
-                <a href="courses/<%= report.course.id %>/chapters" class="text-black-600 hover:text-blue-800">
+                <a href="courses/<%= report.course.id %>/chapters" class="dark:text-black-600 hover:text-blue-800">
                     <%= report.course.coursename %>
                 </a>
                 </td>
