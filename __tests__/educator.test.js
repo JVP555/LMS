@@ -14,14 +14,6 @@ const {
 
 let educatorSession, educatorId, courseId, chapterId, pageId;
 
-beforeAll(async () => {
-  await sequelize.sync({ force: true });
-});
-
-afterAll(async () => {
-  await sequelize.close();
-});
-
 describe("Educator Suite", () => {
   test("Educator Sign Up", async () => {
     const res = await request(app).post("/userssignup").send({
@@ -108,7 +100,6 @@ describe("Educator Suite", () => {
 
     expect(res.statusCode).toBe(302);
 
-    // ✅ Get the most recent page from DB instead
     const latestPage = await Page.findOne({
       where: { chapterId },
       order: [["createdAt", "DESC"]],
@@ -167,6 +158,21 @@ describe("Educator Suite", () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.text).toContain("Course Enrollment Report"); // Make sure your EJS view includes something like "Report"
+  });
+
+  test("Educator Searches for Course", async () => {
+    await request(app)
+      .post("/courses")
+      .set("Cookie", educatorSession)
+      .send({ coursename: "Advanced Physics" });
+
+    const res = await request(app)
+      .get("/search")
+      .set("Cookie", educatorSession)
+      .query({ query: "Physics" });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.text).toContain("Advanced Physics");
   });
 
   test("Educator Logout", async () => {

@@ -23,12 +23,6 @@
     "build": "npx sequelize-cli db:migrate --env production",
     "migrate": "npx sequelize-cli db:migrate"
   },
-  "jest": {
-    "reporters": [
-      "jest-spec-reporter",
-      "default"
-    ]
-  },
   "lint-staged": {
     "*.js": [
       "eslint --fix",

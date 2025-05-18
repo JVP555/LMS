@@ -15,8 +15,6 @@ const {
 let studentSession, studentId, testCourseId, testChapterId, testPageId;
 
 beforeAll(async () => {
-  await sequelize.sync({ force: true });
-
   // Create educator and course
   const educator = await User.create({
     role: "educator",
@@ -147,12 +145,19 @@ describe("Student Suite", () => {
     expect(completion).not.toBeNull();
   });
 
+  test("Student Searches for a Course", async () => {
+    const res = await request(app)
+      .get("/search")
+      .set("Cookie", studentSession)
+      .query({ query: "Test" });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.text).toContain("Search Results");
+    expect(res.text).toContain("Test Course");
+  });
+
   test("Student Logout", async () => {
     const res = await request(app).get("/logout").set("Cookie", studentSession);
     expect(res.statusCode).toBe(302);
   });
-});
-
-afterAll(async () => {
-  await sequelize.close();
 });
