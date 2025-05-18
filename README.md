@@ -5,6 +5,7 @@ This is an Online Learning Management System (LMS) built using Node.js, designed
 Website Live : [https://learning-management-system-79s2.onrender.com](https://learning-management-system-79s2.onrender.com)
 
 Video Demo
+
 ![LMS Demo](./screenrecording/demo.gif)
 
 Features
@@ -51,42 +52,55 @@ Tech Stack
 Screenshots
 
 Homepage
+
 ![Homepage](/screenshots/homepage.png)
 
 Sign Up Page
+
 ![SignUp](./screenshots/signup.png)
 
 Sign In Page
+
 ![SignIn](./screenshots/signin.png)
 
 Educator Dashboard
+
 ![EDashboard](./screenshots/educator.png)
 
 Course Report Educator
+
 ![ECourse Report](./screenshots/ereport.png)
 
 Create Page
+
 ![createpage](./screenshots/create-page.png)
 
 Student Dashboard
+
 ![SDashboard](./screenshots/student.png)
 
 Course Report Student
+
 ![SCourse Report](./screenshots/sreports.png)
 
 Course Enroll Student
+
 ![SEnroll](./screenshots/senroll.png)
 
 Page View
+
 ![PageView](./screenshots/pview.png)
 
 Search
+
 ![Search](./screenshots/search.png)
 
-Change Password
-![CPassword](./screenshots/cpassword.png)
-
 Dark Mode
+
 ![Dark Mode](./screenshots/darkmode.png)
 
-This LMS project was created as part of an academic learning initiative to explore full-stack development with real-world features. Thank you for checking it out! 
+Change Password
+
+![CPassword](./screenshots/cpassword.png)
+
+This LMS project was created as part of an academic learning initiative to explore full-stack development with real-world features. Thank you for checking it out!
