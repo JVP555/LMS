@@ -132,6 +132,7 @@ router.get("/Student", ensureRole("student"), async (req, res) => {
   }
 });
 
+// Enroll in a course
 router.post("/enroll/:courseId", ensureRole("student"), async (req, res) => {
   try {
     const courseId = req.params.courseId;
@@ -157,6 +158,7 @@ router.post("/enroll/:courseId", ensureRole("student"), async (req, res) => {
   }
 });
 
+// View course chapters
 router.get(
   "/student/courses/:courseId/chapters",
   ensureRole("student"),
@@ -263,6 +265,7 @@ router.get(
   }
 );
 
+// View chapter pages
 router.get(
   "/student/chapters/:chapterId/pages",
   ensureRole("student"),
@@ -353,6 +356,7 @@ router.get(
   }
 );
 
+// View page
 router.get("/student/page/:id", ensureRole("student"), async (req, res) => {
   const pageId = req.params.id;
   const userId = req.session.user.id;
@@ -441,6 +445,7 @@ router.get("/student/page/:id", ensureRole("student"), async (req, res) => {
   }
 });
 
+// Mark page as completed
 router.post(
   "/student/markCompleted/:id",
   ensureRole("student"),
@@ -465,6 +470,7 @@ router.post(
   }
 );
 
+// View report
 router.get("/student/viewreport", ensureRole("student"), async (req, res) => {
   const userId = req.session.user.id;
 
@@ -544,7 +550,7 @@ router.get("/student/viewreport", ensureRole("student"), async (req, res) => {
       const totalPages = totalPagesPerCourse[courseId] || 0;
       const completedPages = completedPagesPerCourse[courseId] || 0;
       const percentage =
-        totalPages > 0 ? Math.round((completedPages / totalPages) * 100) : 0;
+        totalPages > 0 ? Math.round((completedPages / totalPages) * 100) : 100;
 
       return {
         course,

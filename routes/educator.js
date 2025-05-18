@@ -67,7 +67,6 @@ router.get("/courses/new", ensureRole("educator"), (req, res) => {
     ],
   });
 });
-
 router.post("/courses", ensureRole("educator"), async (req, res) => {
   const { coursename } = req.body;
   try {
@@ -84,7 +83,7 @@ router.post("/courses", ensureRole("educator"), async (req, res) => {
   }
 });
 
-// Page View
+//Another Creator Page View
 router.get("/page/:pageId", ensureLoggedIn, async (req, res) => {
   const pageId = req.params.pageId;
   try {
@@ -147,6 +146,7 @@ router.get("/page/:pageId", ensureLoggedIn, async (req, res) => {
   }
 });
 
+//My Page View
 router.get("/my-page/:pageId", ensureLoggedIn, async (req, res) => {
   const pageId = req.params.pageId;
   try {
@@ -208,7 +208,8 @@ router.get("/my-page/:pageId", ensureLoggedIn, async (req, res) => {
     res.redirect("/");
   }
 });
-// Mark Page Completed
+
+// Mark My Page Completed
 router.post(
   "/markCompleted/:pageId",
   ensureRole("educator"),
@@ -258,68 +259,7 @@ router.post(
   }
 );
 
-router.get("/courses/:courseId/chapters", ensureLoggedIn, async (req, res) => {
-  const courseId = req.params.courseId;
-  try {
-    const chapters = await Chapter.findAll({ where: { courseId } });
-    const course = await Course.findByPk(courseId);
-    res.render("Educator/educator-chapter", {
-      title: "Chapters",
-      course,
-      chapters,
-      user: req.session.user,
-      showDashboardFeaturesstudent: false,
-      showDashboardFeatures: false,
-      breadcrumb: [
-        { label: "Dashboard", href: "/Educator" },
-        { label: course.coursename },
-      ],
-    });
-  } catch (err) {
-    console.error(err);
-    req.flash("error", "Failed to load chapters.");
-    res.redirect("/Educator");
-  }
-});
-
-router.get("/chapters/:chapterId/pages", ensureLoggedIn, async (req, res) => {
-  const chapterId = req.params.chapterId;
-  try {
-    const chapter = await Chapter.findByPk(chapterId, {
-      include: {
-        model: Course,
-      },
-    });
-    if (!chapter) {
-      req.flash("error", "Chapter not found.");
-      return res.redirect("/Educator");
-    }
-
-    const pages = await Page.findAll({ where: { chapterId } });
-
-    res.render("Educator/educator-page", {
-      title: "Pages",
-      chapter,
-      pages,
-      user: req.session.user,
-      showDashboardFeaturesstudent: false,
-      showDashboardFeatures: false,
-      breadcrumb: [
-        { label: "Dashboard", href: "/Educator" },
-        {
-          label: chapter.Course.coursename,
-          href: `/courses/${chapter.Course.id}/chapters`,
-        },
-        { label: chapter.chaptername },
-      ],
-    });
-  } catch (err) {
-    console.error(err);
-    req.flash("error", "Failed to load pages.");
-    res.redirect("/Educator");
-  }
-});
-
+//My Courses
 router.get("/my-courses", ensureLoggedIn, async (req, res) => {
   try {
     const userId = req.session.user.id;
@@ -371,7 +311,71 @@ router.get("/my-courses", ensureLoggedIn, async (req, res) => {
   }
 });
 
-// Edit Course Route (GET)
+//View Chapters
+router.get("/courses/:courseId/chapters", ensureLoggedIn, async (req, res) => {
+  const courseId = req.params.courseId;
+  try {
+    const chapters = await Chapter.findAll({ where: { courseId } });
+    const course = await Course.findByPk(courseId);
+    res.render("Educator/educator-chapter", {
+      title: "Chapters",
+      course,
+      chapters,
+      user: req.session.user,
+      showDashboardFeaturesstudent: false,
+      showDashboardFeatures: false,
+      breadcrumb: [
+        { label: "Dashboard", href: "/Educator" },
+        { label: course.coursename },
+      ],
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to load chapters.");
+    res.redirect("/Educator");
+  }
+});
+
+//View Pages
+router.get("/chapters/:chapterId/pages", ensureLoggedIn, async (req, res) => {
+  const chapterId = req.params.chapterId;
+  try {
+    const chapter = await Chapter.findByPk(chapterId, {
+      include: {
+        model: Course,
+      },
+    });
+    if (!chapter) {
+      req.flash("error", "Chapter not found.");
+      return res.redirect("/Educator");
+    }
+
+    const pages = await Page.findAll({ where: { chapterId } });
+
+    res.render("Educator/educator-page", {
+      title: "Pages",
+      chapter,
+      pages,
+      user: req.session.user,
+      showDashboardFeaturesstudent: false,
+      showDashboardFeatures: false,
+      breadcrumb: [
+        { label: "Dashboard", href: "/Educator" },
+        {
+          label: chapter.Course.coursename,
+          href: `/courses/${chapter.Course.id}/chapters`,
+        },
+        { label: chapter.chaptername },
+      ],
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to load pages.");
+    res.redirect("/Educator");
+  }
+});
+
+// Edit Course
 router.get(
   "/courses/:courseId/edit",
   ensureRole("educator"),
@@ -409,8 +413,6 @@ router.get(
     }
   }
 );
-
-// Update Course Route (POST)
 router.post("/courses/:courseId", ensureRole("educator"), async (req, res) => {
   const courseId = req.params.courseId;
   const { coursename } = req.body;
@@ -433,7 +435,7 @@ router.post("/courses/:courseId", ensureRole("educator"), async (req, res) => {
   }
 });
 
-// Delete Course Route (POST)
+// Delete Course
 router.post(
   "/courses/:courseId/delete",
   ensureRole("educator"),
@@ -463,7 +465,7 @@ router.post(
   }
 );
 
-// My Chapters (Educator)
+// My Chapters
 router.get(
   "/my-chapters/:courseId",
   ensureRole("educator"),
@@ -505,6 +507,7 @@ router.get(
   }
 );
 
+// Create New Chapter
 router.get(
   "/my-courses/:courseId/my-chapters/new",
   ensureLoggedIn,
@@ -546,7 +549,6 @@ router.get(
     }
   }
 );
-
 router.post(
   "/my-courses/:courseId/my-chapters",
   ensureLoggedIn,
@@ -572,7 +574,7 @@ router.post(
   }
 );
 
-// Edit Chapter Form
+// Edit Chapter
 router.get(
   "/chapters/:chapterId/edit",
   ensureRole("educator"),
@@ -624,8 +626,6 @@ router.get(
     }
   }
 );
-
-// Update Chapter
 router.post(
   "/chapters/:chapterId",
   ensureRole("educator"),
@@ -656,7 +656,7 @@ router.post(
   }
 );
 
-// Handle Chapter Deletion
+//Chapter Deletion
 router.post(
   "/chapters/:chapterId/delete",
   ensureRole("educator"),
@@ -691,7 +691,8 @@ router.post(
     }
   }
 );
-//pagessss
+
+//My Pages
 router.get(
   "/my-chapters/:chapterId/my-pages",
   ensureRole("educator"),
@@ -738,6 +739,7 @@ router.get(
   }
 );
 
+//Create Page
 router.get(
   "/my-chapter/:chapterId/my-pages/new",
   ensureRole("educator"),
@@ -788,7 +790,6 @@ router.get(
     }
   }
 );
-
 router.post(
   "/my-chapter/:chapterId/my-pages",
   ensureRole("educator"),
@@ -819,7 +820,7 @@ router.post(
   }
 );
 
-// Edit Page Route (GET)
+// Edit Page
 router.get("/pages/:pageId/edit", ensureRole("educator"), async (req, res) => {
   const pageId = req.params.pageId;
   try {
@@ -870,8 +871,6 @@ router.get("/pages/:pageId/edit", ensureRole("educator"), async (req, res) => {
     res.redirect("/Educator");
   }
 });
-
-// Update Page Route (POST)
 router.post("/pages/:pageId/edit", ensureRole("educator"), async (req, res) => {
   const rawPageId = req.params.pageId;
   const pageId = parseInt(rawPageId, 10);
@@ -903,6 +902,7 @@ router.post("/pages/:pageId/edit", ensureRole("educator"), async (req, res) => {
   }
 });
 
+// Delete Page
 router.post(
   "/pages/:pageId/delete",
   ensureRole("educator"),
@@ -944,7 +944,8 @@ router.post(
     }
   }
 );
-// View Report for a Course
+
+// View Course Report
 router.get("/educator/viewreport", ensureRole("educator"), async (req, res) => {
   try {
     const educatorId = req.session.user.id;

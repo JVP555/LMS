@@ -16,7 +16,9 @@ const {
 
 const { ensureLoggedIn, ensureRole } = require("../middleware");
 const { Op } = require("sequelize");
-//________________________General_________________________________________________________-
+//________________________General_________________________________________________________
+
+//Home
 router.get("/", (req, res) => {
   if (req.session.user) {
     return res.redirect(
@@ -30,7 +32,7 @@ router.get("/", (req, res) => {
   });
 });
 
-// Auth: Sign Up
+//Sign Up
 router.get("/signup", (req, res) => {
   res.render("General/signup", {
     title: "Sign Up",
@@ -66,7 +68,7 @@ router.post("/userssignup", async (req, res) => {
   }
 });
 
-// Auth: Sign In
+// Sign In
 router.get("/signin", (req, res) => {
   res.render("General/signin", {
     title: "Sign In",
@@ -114,10 +116,9 @@ router.post("/userssignin", async (req, res) => {
   }
 });
 
+// Change Password
 router.get("/changepassword/:userId", ensureLoggedIn, async (req, res) => {
   const { userId } = req.params;
-
-  // Ensure the user is changing their own password
   if (parseInt(userId) !== req.session.user.id) {
     req.flash("error", "Unauthorized access.");
     return res.redirect("/");
@@ -177,8 +178,6 @@ router.post("/changepassword/:userId", ensureLoggedIn, async (req, res) => {
     await user.update({ password: hashedNewPassword });
 
     req.flash("success", "Password changed successfully.");
-
-    // ✅ Redirect based on user role
     const redirectPath =
       req.session.user.role === "educator" ? "/educator" : "/student";
     return res.redirect(redirectPath);
@@ -189,6 +188,7 @@ router.post("/changepassword/:userId", ensureLoggedIn, async (req, res) => {
   }
 });
 
+// Search
 router.get("/search", async (req, res) => {
   const query = req.query.query?.trim();
   if (!query) return res.redirect(`/${req.session.user.role}`);
@@ -199,11 +199,11 @@ router.get("/search", async (req, res) => {
         [Op.or]: [
           {
             coursename: {
-              [Op.iLike]: `%${query}%`, // partial match on course title
+              [Op.iLike]: `%${query}%`,
             },
           },
           {
-            userId: isNaN(query) ? -1 : parseInt(query), // match userId if query is a number
+            userId: isNaN(query) ? -1 : parseInt(query),
           },
         ],
       },
